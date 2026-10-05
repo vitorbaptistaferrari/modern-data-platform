@@ -17,7 +17,7 @@ The generator is designed to be:
 """
 
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 
 import random
 import string
@@ -228,6 +228,116 @@ def generate_users(config: GeneratorConfig) -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
+def generate_opportunities(
+    config: GeneratorConfig,
+    customers: pd.DataFrame,
+    users: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Generate synthetic opportunity records.
+
+    Opportunities are linked to previously generated customers
+    and users and distributed across the configured reporting
+    period.
+    """
+
+    random.seed(config.seed + 2)
+
+    brands = [
+        "Alpha",
+        "Beta",
+        "Gamma",
+    ]
+
+    opportunity_types = [
+        "Prospecting",
+        "Retention",
+        "Expansion",
+    ]
+
+    stages = [
+        "Qualification",
+        "Proposal",
+        "Negotiation",
+        "Closed Won",
+        "Closed Lost",
+    ]
+
+    opportunity_origins = [
+        "Inbound",
+        "Outbound",
+        "Referral",
+        "Partner",
+        "Existing Customer",
+    ]
+
+    customer_ids = customers["customer_id"].tolist()
+    user_ids = users["user_id"].tolist()
+
+    date_range_days = (
+        config.end_date - config.start_date
+    ).days
+
+    records = []
+
+    for i in range(1, config.n_opportunities + 1):
+        customer_id = random.choice(customer_ids)
+        user_id = random.choice(user_ids)
+
+        opportunity_type = random.choice(
+            opportunity_types
+        )
+
+        stage = random.choice(stages)
+
+        opportunity_date = (
+            config.start_date
+            + timedelta(
+                days=random.randint(
+                    0,
+                    date_range_days,
+                )
+            )
+        )
+
+        close_date = opportunity_date + timedelta(
+            days=random.randint(
+                7,
+                120,
+            )
+        )
+
+        if close_date > config.end_date:
+            close_date = config.end_date
+
+        amount = round(
+            random.uniform(
+                10000,
+                2000000,
+            ),
+            2,
+        )
+
+        records.append(
+            {
+                "opportunity_id": f"OPP-{i:07d}",
+                "customer_id": customer_id,
+                "user_id": user_id,
+                "opportunity_type": opportunity_type,
+                "stage": stage,
+                "brand": random.choice(brands),
+                "origin": random.choice(
+                    opportunity_origins
+                ),
+                "opportunity_date": opportunity_date,
+                "close_date": close_date,
+                "amount": amount,
+            }
+        )
+
+    return pd.DataFrame(records)
+
+
 if __name__ == "__main__":
     config = DEFAULT_CONFIG
 
@@ -273,4 +383,18 @@ if __name__ == "__main__":
     print(
         f"\nTotal users: "
         f"{len(users)}"
+    )
+
+    opportunities = generate_opportunities(
+        config,
+        customers,
+        users,
+    )
+
+    print("\nGenerated opportunities:")
+    print(opportunities.head())
+
+    print(
+        f"\nTotal opportunities: "
+        f"{len(opportunities)}"
     )
