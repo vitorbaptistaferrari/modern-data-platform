@@ -2,9 +2,11 @@
 
 ## Base Measures
 
-The semantic measure layer is built directly on top of the Gold fact tables.
+The semantic measure layer is built on top of the analytical fact tables available in the Power BI Semantic Model.
 
-These measures provide the foundation for the analytical layer and are reused by more advanced calculations such as YTD, Year-over-Year and target achievement.
+For the public repository, these analytical tables are populated with controlled synthetic data embedded in the Power BI project.
+
+The measures provide the foundation for more advanced calculations such as YTD, Year-over-Year and target achievement.
 
 ---
 
@@ -175,14 +177,14 @@ The analytical model uses explicit variance names to make the business meaning c
 Represents the difference between current Revenue and current Target.
 
     Revenue Variance =
-    Revenue - Target
+    [Revenue] - [Target]
 
 ## Revenue Target Variance YTD
 
 Represents the accumulated difference between Revenue YTD and Target YTD.
 
     Revenue Target Variance YTD =
-    Revenue YTD - Target YTD
+    [Revenue YTD] - [Target YTD]
 
 The explicit naming prevents ambiguity between monthly variance, YTD variance and Year-over-Year variation.
 
@@ -234,7 +236,7 @@ Percentage measures should use:
 
 # Analytical Measure Set
 
-The complete analytical measure set planned for the Semantic Model is:
+The complete analytical measure set currently implemented in the Semantic Model is:
 
 ## Base
 
@@ -262,3 +264,5 @@ The complete analytical measure set planned for the Semantic Model is:
 
 - Revenue Variance
 - Revenue Target Variance YTD
+
+The complete measure set is implemented in the current public Power BI Semantic Model.
