@@ -5,22 +5,30 @@ Silver Layer - Customers
 Transforms the Bronze customer dataset into a standardized
 Silver representation.
 
-Responsibilities:
+The transformation reuses common Silver utilities for:
 
-- Validate source structure
-- Standardize text fields
-- Apply data types
-- Remove invalid primary keys
-- Deduplicate records
-- Add Silver technical metadata
+- Validation
+- Text standardization
+- Key validation
+- Deduplication
+- Silver metadata
+- Persistence
 
 Business rules are intentionally excluded from this layer.
 """
 
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+
+from silver_utils import (
+    add_silver_metadata,
+    deduplicate,
+    remove_invalid_keys,
+    save_silver,
+    standardize_text_columns,
+    validate_columns,
+)
 
 
 # ----------------------------------------------------------------------
@@ -34,6 +42,8 @@ BRONZE_PATH = Path(
 SILVER_PATH = Path(
     "data/silver/customers.parquet"
 )
+
+SOURCE_TABLE = "customers"
 
 
 EXPECTED_COLUMNS = [
@@ -49,59 +59,30 @@ EXPECTED_COLUMNS = [
 
 
 # ----------------------------------------------------------------------
-# VALIDATION
-# ----------------------------------------------------------------------
-
-def validate_columns(
-    df: pd.DataFrame,
-) -> None:
-    """
-    Validate whether the source contains the expected columns.
-    """
-
-    missing_columns = [
-        column
-        for column in EXPECTED_COLUMNS
-        if column not in df.columns
-    ]
-
-    if missing_columns:
-        raise ValueError(
-            "Missing expected columns: "
-            f"{missing_columns}"
-        )
-
-
-# ----------------------------------------------------------------------
-# STANDARDIZATION
+# CUSTOMER-SPECIFIC STANDARDIZATION
 # ----------------------------------------------------------------------
 
 def standardize_customers(
     df: pd.DataFrame,
 ) -> pd.DataFrame:
     """
-    Standardize customer fields.
+    Apply customer-specific standardization.
+
+    Generic text cleaning is delegated to the Silver utilities.
     """
 
-    df = df.copy()
-
-    text_columns = [
-        "customer_id",
-        "customer_name",
-        "tax_id",
-        "city",
-        "state",
-        "segment",
-        "status",
-    ]
-
-    for column in text_columns:
-
-        df[column] = (
-            df[column]
-            .astype("string")
-            .str.strip()
-        )
+    df = standardize_text_columns(
+        df,
+        [
+            "customer_id",
+            "customer_name",
+            "tax_id",
+            "city",
+            "state",
+            "segment",
+            "status",
+        ],
+    )
 
     df["state"] = (
         df["state"]
@@ -116,68 +97,6 @@ def standardize_customers(
     df["status"] = (
         df["status"]
         .str.title()
-    )
-
-    return df
-
-
-# ----------------------------------------------------------------------
-# QUALITY
-# ----------------------------------------------------------------------
-
-def apply_quality_rules(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    Apply technical data quality rules.
-
-    Records without a customer identifier are removed.
-    Duplicate customer identifiers are reduced to one record.
-    """
-
-    df = df.copy()
-
-    df = df[
-        df["customer_id"].notna()
-        & (df["customer_id"] != "")
-    ]
-
-    df = (
-        df.sort_values(
-            by="dt_ingestao"
-        )
-        .drop_duplicates(
-            subset=["customer_id"],
-            keep="last",
-        )
-    )
-
-    return df
-
-
-# ----------------------------------------------------------------------
-# SILVER METADATA
-# ----------------------------------------------------------------------
-
-def add_silver_metadata(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    Add technical metadata related to Silver processing.
-    """
-
-    df = df.copy()
-
-    df["dt_processamento_silver"] = (
-        datetime.now(timezone.utc)
-    )
-
-    df["nm_camada_origem"] = (
-        "bronze"
-    )
-
-    df["nm_tabela_origem"] = (
-        "customers"
     )
 
     return df
@@ -216,7 +135,10 @@ def process_customers() -> pd.DataFrame:
     # 1. Validate structure
     # --------------------------------------------------------------
 
-    validate_columns(df)
+    validate_columns(
+        df,
+        EXPECTED_COLUMNS,
+    )
 
     # --------------------------------------------------------------
     # 2. Standardize fields
@@ -225,37 +147,43 @@ def process_customers() -> pd.DataFrame:
     df = standardize_customers(df)
 
     # --------------------------------------------------------------
-    # 3. Apply quality rules
+    # 3. Validate primary key
     # --------------------------------------------------------------
 
-    df = apply_quality_rules(df)
-
-    # --------------------------------------------------------------
-    # 4. Add Silver metadata
-    # --------------------------------------------------------------
-
-    df = add_silver_metadata(df)
-
-    # --------------------------------------------------------------
-    # 5. Persist Silver
-    # --------------------------------------------------------------
-
-    SILVER_PATH.parent.mkdir(
-        parents=True,
-        exist_ok=True,
+    df = remove_invalid_keys(
+        df,
+        ["customer_id"],
     )
 
-    df.to_parquet(
+    # --------------------------------------------------------------
+    # 4. Deduplicate
+    # --------------------------------------------------------------
+
+    df = deduplicate(
+        df,
+        ["customer_id"],
+    )
+
+    # --------------------------------------------------------------
+    # 5. Add Silver metadata
+    # --------------------------------------------------------------
+
+    df = add_silver_metadata(
+        df,
+        SOURCE_TABLE,
+    )
+
+    # --------------------------------------------------------------
+    # 6. Persist Silver
+    # --------------------------------------------------------------
+
+    save_silver(
+        df,
         SILVER_PATH,
-        index=False,
     )
 
     print(
         f"Silver records: {len(df)}"
-    )
-
-    print(
-        f"Silver output: {SILVER_PATH}"
     )
 
     return df
