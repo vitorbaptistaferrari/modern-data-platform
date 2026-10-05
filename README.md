@@ -6,6 +6,8 @@ The project brings together data ingestion, transformation, dimensional modeling
 
 > **The data changes. The architecture remains.**
 
+![Modern Data Platform Architecture](docs/images/architecture.png)
+
 ---
 
 ## Project Overview
@@ -340,7 +342,9 @@ Shared dimensions provide consistent analytical filtering across revenue and tar
     ├── docs/
     │   ├── architecture.md
     │   ├── data-model.md
-    │   └── semantic-model.md
+    │   ├── semantic-model.md
+    │   └── images/
+    │       └── architecture.png
     │
     ├── powerbi/
     │   ├── ModernDataPlatform.pbip
