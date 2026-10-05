@@ -2,417 +2,356 @@
 
 ## Overview
 
-This project implements an end-to-end modern data platform using a Medallion Architecture.
+The `modern-data-platform` project demonstrates an end-to-end data engineering and analytics architecture based on the Medallion Architecture.
 
-The platform transforms operational revenue data into a trusted analytical model for reporting and decision-making.
+The platform is organized into two complementary areas:
 
-The architecture separates technical ingestion, data standardization, business transformation and analytical consumption into clearly defined layers.
+### Data Engineering
 
-The implementation is based on synthetic data and is intentionally independent from any proprietary production environment.
+    Synthetic Sources
+            |
+            v
+        Ingestion
+            |
+            v
+         Bronze
+            |
+            v
+         Silver
+            |
+            v
+          Gold
 
----
+### Analytics
 
-## Architecture Layers
+    Gold analytical structures
+            |
+            v
+    Synthetic Analytical Dataset
+            |
+            v
+    Power BI Semantic Model
+            |
+            v
+       Power BI Report
 
-The platform is organized into the following layers:
+The two areas are conceptually aligned, but the public Power BI implementation does not require a physical runtime connection to the Gold layer.
 
-Sources
-   │
-   ▼
-Ingestion
-   │
-   ▼
-Bronze
-   │
-   ▼
-Silver
-   │
-   ▼
-Gold
-   │
-   ▼
-Semantic Model
-   │
-   ▼
-Power BI
+This design allows the repository to remain functional and reproducible without exposing production data or depending on proprietary infrastructure.
 
-Each layer has a specific responsibility.
+## Architectural Layers
 
----
+### Source Layer
 
-## Sources
+The public project uses synthetic source data representing common business domains found in a revenue-oriented data platform.
 
-The synthetic platform represents three main source domains:
+The main source domains include:
 
-- CRM / Revenue Source
-- Target Data
-- Geographic Reference
+- CRM data
+- Target data
+- Customer and opportunity data
+- Supporting reference data
 
-The CRM domain represents operational commercial entities such as customers, opportunities, contracts and quotes.
+The source data is generated specifically for the public repository.
 
-Target data represents business targets by reporting period, brand and target classification.
-
-Geographic reference data is used to enrich analytical entities with location attributes.
-
-All source data used in this repository is synthetic.
-
----
+No production data is used.
 
 ## Ingestion Layer
 
-The ingestion layer represents a Copy Job pattern that extracts the required fields from operational sources and moves them into the Bronze layer.
+The ingestion layer is responsible for bringing source data into the platform with minimal transformation.
 
-The ingestion strategy used in the initial implementation is:
+The public implementation uses local synthetic files to reproduce the ingestion pattern.
 
-**Full Load with Overwrite**
+The conceptual production-oriented pattern represented by the project is compatible with a Copy Job style ingestion process.
 
-This approach was selected as a pragmatic starting point because the synthetic source environment contains historical data and the expected data volume is manageable.
+The ingestion strategy is currently based on:
 
-The architecture is not dependent on this strategy permanently.
+- Full Load
+- Overwrite processing
+- Metadata-driven execution
+- Structural validation
 
-Future implementations may introduce incremental or hybrid ingestion using mechanisms such as:
+The current approach is intentionally simple and reproducible.
+
+Future implementations could introduce incremental or hybrid ingestion strategies using mechanisms such as:
 
 - Watermarks
 - Change tracking
-- Source timestamps
-- Incremental extraction criteria
+- Source modification timestamps
+- Incremental processing
 
-The ingestion layer focuses on moving data reliably into the platform.
+## Bronze Layer
 
-It does not apply analytical business rules.
+The Bronze layer represents the first persisted layer of the Medallion Architecture.
 
----
+Its primary responsibility is controlled ingestion and preservation of source information.
 
-# Bronze Layer
+The Bronze layer performs limited technical processing such as:
 
-The Bronze layer represents the raw ingestion zone.
-
-Its primary responsibilities are:
-
-- Read source datasets
-- Validate source availability
-- Preserve source information
-- Add technical ingestion metadata
-- Persist the ingested data
-- Provide ingestion execution status
-
-The current implementation uses:
-
-**Full Load with Overwrite**
-
-Each dataset is processed independently so that failures can be identified at dataset level.
-
-Technical metadata includes the ingestion timestamp:
-
-dt_ingestao
-
-The Bronze layer intentionally avoids business transformations.
-
-Examples of logic that do not belong in Bronze:
-
-- Revenue classification
-- Business segmentation
-- Revenue hierarchy
-- KPI calculations
-- Analytical aggregations
-
----
-
-# Silver Layer
-
-The Silver layer transforms Bronze data into standardized and quality-controlled datasets.
-
-Its responsibilities include:
-
+- Schema normalization
+- Column normalization
+- Empty-row handling
 - Structural validation
-- Column validation
+- Ingestion metadata
+- Persistence of source datasets
+
+The ingestion timestamp is recorded as technical metadata.
+
+Business rules are intentionally not applied at this stage.
+
+The Bronze layer therefore maintains a close representation of the ingested source structure while providing enough technical standardization for downstream processing.
+
+## Silver Layer
+
+The Silver layer transforms ingested data into standardized and reusable datasets.
+
+Its responsibilities include:
+
 - Data type standardization
-- Text normalization
-- Primary key validation
-- Foreign key validation
-- Deduplication
-- Technical processing metadata
-- Persistence of standardized datasets
+- Column standardization
+- Data validation
+- Duplicate handling
+- Key generation
+- Metadata enrichment
+- Reusable transformation logic
+- Consolidation of related source entities
 
-The current Silver implementation contains reusable utilities to reduce duplicated transformation logic across entities.
+The Silver layer provides cleaner and more consistent datasets for analytical processing.
 
-Common utilities include:
+Business rules that define analytical concepts are kept primarily outside the Silver layer whenever they belong to the business or analytical domain.
 
-- validate_columns()
-- standardize_text_columns()
-- remove_invalid_keys()
-- deduplicate()
-- add_silver_metadata()
-- save_silver()
+## Gold Layer
 
-This promotes consistency across Silver transformations.
-
----
-
-## Silver Entities
-
-The current Silver layer contains the following datasets:
-
-- Customers
-- Users
-- Record Types
-- Opportunity Stages
-- Opportunities
-- Contracts
-- Quotes
-- Targets
-
-Each transformation follows the same general pattern:
-
-Read Bronze
-    ↓
-Validate Structure
-    ↓
-Standardize
-    ↓
-Apply Technical Quality Rules
-    ↓
-Add Silver Metadata
-    ↓
-Persist Silver
-
----
-
-## Silver Data Quality
-
-The Silver layer performs technical data quality checks such as:
-
-- Required column validation
-- Primary key validation
-- Foreign key validation
-- Null and empty key detection
-- Duplicate detection
-- Data type conversion
-
-These checks ensure that the datasets entering the Gold layer have a predictable and consistent structure.
-
----
-
-## Business Rules Boundary
-
-Business semantics are intentionally kept outside the Silver layer.
-
-For example, the source classification:
-
-Retention
-
-may later become:
-
-Renewal
-
-in the Gold layer.
-
-Likewise, the classification of Expansion opportunities into:
-
-- Cross-Sell
-- Up-Sell
-
-belongs to the analytical business rules implemented in Gold.
-
-This separation prevents business logic from being mixed with technical data preparation.
-
----
-
-# Gold Layer
-
-The Gold layer is the analytical business layer of the platform.
+The Gold layer contains business-oriented analytical structures.
 
 Its responsibilities include:
 
-- Apply business rules
-- Create analytical dimensions
-- Create analytical fact tables
-- Generate surrogate keys
-- Establish analytical relationships
-- Consolidate business concepts
-- Prepare data for semantic modeling
+- Business rule application
+- Dimensional modeling
+- Analytical dimensions
+- Analytical fact tables
+- Surrogate keys
+- Revenue classification
+- Target modeling
+- Analytical hierarchies
 
-The Gold layer transforms standardized operational entities into an analytical model.
+The public model contains dimensions such as:
 
-Conceptually:
+- Dim Calendar
+- Dim Brand
+- Dim User
+- Dim Opportunity
+- Dim Opportunity Stage
+- Dim Negotiation Type
+- Dim Target Type
+- Dim Revenue Hierarchy
 
-Silver Entities
-      │
-      ▼
-Business Rules
-      │
-      ├── Dimensions
-      │
-      └── Facts
-             │
-             ▼
-       Analytical Model
+The main analytical facts are:
 
----
+- Fact Revenue
+- Fact Target
 
-## Analytical Dimensions
+The Gold layer is therefore the main analytical output of the Data Engineering pipeline.
 
-The planned Gold model includes dimensions such as:
+## Semantic Model
 
-- Brand
-- Calendar
-- User
-- Negotiation Type
-- Opportunity Stage
-- Opportunity
-- Target Type
-- Revenue Hierarchy
+The Power BI Semantic Model is not considered a fourth Medallion layer.
 
-Dimensions provide descriptive context for analytical facts.
+It is the analytical modeling layer used to organize business concepts for reporting and business intelligence.
 
----
+The semantic model follows the structures and concepts defined in the Gold layer, including:
 
-## Analytical Facts
+- Fact and dimension structures
+- Analytical hierarchies
+- Shared dimensions
+- Surrogate-key-based relationships
+- Revenue and target concepts
+- Time intelligence
 
-The planned Gold model includes:
+### Public Implementation
 
-- Revenue Fact
-- Target Fact
+For public reproducibility, the Power BI project uses a controlled synthetic analytical dataset embedded directly in the semantic model.
 
-The Revenue Fact represents analytical revenue generated from opportunity-related business rules.
+This is an intentional design decision.
 
-The Target Fact represents business targets by reporting period, brand and target classification.
+The public project does not establish a direct runtime connection between Power BI and the Gold layer.
 
----
+Instead, the synthetic Power BI dataset reproduces the relevant analytical structures defined by Gold.
 
-## Revenue Classification
+This provides a practical balance between:
 
-Revenue is classified using business rules rather than hardcoded record identifiers.
+- Architectural fidelity
+- Public reproducibility
+- Data privacy
+- Functional Power BI analysis
+- Independence from production infrastructure
 
-The analytical model supports:
+The conceptual relationship can therefore be represented as:
 
-- Prospecting
-- Renewal
-- Expansion
-  - Cross-Sell
-  - Up-Sell
+    Gold
+      |
+      | analytical design
+      v
+    Synthetic Analytical Dataset
+      |
+      v
+    Power BI Semantic Model
+      |
+      v
+    Power BI Report
 
-The exact classification is determined during Gold processing based on opportunity attributes and related business entities.
+The arrows above represent architectural alignment rather than a required physical data connection in the public implementation.
 
----
+## Power BI Layer
 
-## Surrogate Keys
+The Power BI layer provides reporting and business intelligence capabilities over the semantic model.
 
-The Gold layer uses surrogate keys to provide stable analytical identifiers for dimensions and facts.
-
-The public implementation uses deterministic hashing for selected business keys.
-
-This approach allows analytical relationships to remain independent from source-system identifiers.
-
----
-
-# Semantic Model
-
-The Semantic Model is not considered another Medallion layer.
-
-It is the analytical consumption layer built on top of the Gold model.
-
-Its responsibilities include:
-
-- Define analytical relationships
-- Expose business measures
-- Provide reusable calculations
-- Support time intelligence
-- Simplify Power BI consumption
-
-Examples of analytical measures include:
+The semantic model includes reusable DAX measures for:
 
 - Revenue
 - Target
-- Achievement %
-- Revenue YTD
-- Target YTD
-- Revenue LY
-- Revenue YoY
-- Revenue Variance
+- Achievement
+- Year-to-date analysis
+- Previous-year analysis
+- Year-over-year variation
+- Revenue variance
+- Target variance
 
----
+The Power BI project is maintained in `.pbip` format to support version control and transparent project structure.
 
-# Power BI
+## Data Flow
 
-Power BI is the final visualization and consumption layer.
+The complete conceptual flow is:
 
-The reporting layer consumes the Semantic Model rather than directly accessing raw operational sources.
+    Synthetic Sources
+            |
+            v
+       Ingestion
+            |
+            v
+         Bronze
+            |
+            v
+         Silver
+            |
+            v
+          Gold
+            |
+            | analytical structures
+            v
+    Synthetic Analytical Dataset
+            |
+            v
+    Power BI Semantic Model
+            |
+            v
+       Power BI Report
 
-This provides a clear separation between:
+The first part represents the Data Engineering pipeline.
 
-Data Engineering
-        ↓
-Analytical Modeling
-        ↓
-Semantic Modeling
-        ↓
-Visualization
+The second part represents the public analytical implementation.
 
-The platform is therefore not designed around individual dashboards.
+## Data Engineering Principles
 
-The dashboard is the final consumer of a reusable analytical data product.
+The architecture follows several core principles.
 
----
+### Separation of Responsibilities
 
-# Design Principles
+Each layer has a defined responsibility.
 
-## Separation of Responsibilities
+- Bronze focuses on ingestion.
+- Silver focuses on standardization and reusable transformation.
+- Gold focuses on business-oriented analytical structures.
+- Semantic Model focuses on analytical consumption.
+- Power BI focuses on visualization and reporting.
 
-Each layer has a clearly defined responsibility.
+### Reusability
 
-Bronze → Ingestion
-Silver → Standardization & Technical Quality
-Gold → Business Rules & Analytical Modeling
-Semantic Model → Analytical Consumption
-Power BI → Visualization
+Transformation and analytical logic should be implemented through reusable components whenever possible.
 
----
+### Data-Volume Agnostic Design
 
-## Data-Volume Agnostic
+The public implementation is designed so that the architecture does not depend on a specific production data volume.
 
-The architecture does not depend on a fixed number of customers, opportunities or transactions.
+The synthetic dataset is intentionally smaller than a production environment while preserving the relevant structural patterns.
 
-New entities and increasing data volumes can be introduced without redesigning the core architecture.
+### Business Rule Isolation
 
----
+Business rules should be kept explicit and separated from low-level ingestion logic.
 
-## Time-Period Agnostic
+This makes the platform easier to maintain and adapt when business definitions change.
 
-The platform is not tied to a specific reporting year.
+### Data-Driven Architecture
 
-New reporting periods can be introduced without redesigning the architecture.
+The platform should rely on metadata, configuration and reusable processing patterns instead of excessive hardcoding.
 
----
+### Reproducibility
 
-## Synthetic by Design
+The public repository must remain executable and understandable without access to proprietary infrastructure.
 
-All data in this public repository is synthetic.
+Synthetic data is therefore used wherever production data would otherwise be required.
 
-No proprietary data, credentials, production identifiers or internal company information are included.
+## Production vs Public Implementation
 
-The project demonstrates architecture and engineering patterns rather than exposing a production implementation.
+The architecture intentionally distinguishes between the conceptual production pattern and the public portfolio implementation.
 
----
+### Conceptual Architecture
 
-## Business Rule Isolation
+A production implementation could follow:
 
-Business rules are implemented in the Gold layer rather than embedded in ingestion or technical standardization processes.
+    Source Systems
+          |
+          v
+    Fabric Ingestion
+          |
+          v
+        Bronze
+          |
+          v
+        Silver
+          |
+          v
+         Gold
+          |
+          v
+    Semantic Model
+          |
+          v
+       Power BI
 
-This makes the platform easier to maintain, test and evolve.
+### Public Repository
 
----
+The public implementation uses:
 
-## Reusability
+    Synthetic Source Files
+          |
+          v
+       Bronze
+          |
+          v
+       Silver
+          |
+          v
+        Gold
 
-Common technical transformations are centralized into reusable utilities whenever possible.
+and separately:
 
-This reduces duplicated code and creates consistent processing patterns across datasets.
+    Synthetic Analytical Dataset
+          |
+          v
+    Power BI Semantic Model
+          |
+          v
+       Power BI Report
 
----
+The public implementation intentionally avoids requiring external production infrastructure while preserving the same analytical concepts.
 
-## Data-Driven Architecture
+## Design Principle
 
-The platform is designed so that the data changes while the underlying architecture remains stable.
+A central principle of the project is:
 
-> **The data changes. The architecture remains.**
+> The data changes. The architecture remains.
+
+Production data may change in structure, volume or business context.
+
+The objective of the architecture is to provide reusable patterns that remain applicable as the underlying data evolves.
