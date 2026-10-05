@@ -94,7 +94,7 @@ The data engineering architecture follows the Medallion Architecture pattern.
     │  Star schema                  │
     │  DAX measures                 │
     │  Time intelligence            │
-    │  Variance analysis             │
+    │  Variance analysis            │
     └───────────────┬───────────────┘
                     │
                     ▼
@@ -234,6 +234,36 @@ The semantic model is not considered an additional Medallion layer. It represent
 
 ---
 
+## Power BI Dashboard
+
+The Power BI implementation provides a compact analytical view of revenue performance, target achievement and time-based analysis.
+
+The dashboard is organized into three analytical views:
+
+- Revenue Performance
+- Revenue Analysis
+- Time Intelligence
+
+### Revenue Performance
+
+Executive view focused on revenue, target, achievement and year-over-year performance.
+
+![Revenue Performance](docs/images/revenue-performance.png)
+
+### Revenue Analysis
+
+Analytical view focused on negotiation type, revenue hierarchy and opportunity stage.
+
+![Revenue Analysis](docs/images/revenue-analysis.png)
+
+### Time Intelligence
+
+Time-based analysis covering YTD performance, target achievement and comparison with the previous year.
+
+![Time Intelligence](docs/images/time-intelligence.png)
+
+---
+
 ## Analytical Measures
 
 The semantic model includes measures for:
@@ -344,7 +374,10 @@ Shared dimensions provide consistent analytical filtering across revenue and tar
     │   ├── data-model.md
     │   ├── semantic-model.md
     │   └── images/
-    │       └── architecture.png
+    │       ├── architecture.png
+    │       ├── revenue-performance.png
+    │       ├── revenue-analysis.png
+    │       └── time-intelligence.png
     │
     ├── powerbi/
     │   ├── ModernDataPlatform.pbip
@@ -496,6 +529,7 @@ The current implementation includes:
 - Time intelligence
 - Variance analysis
 - Year-over-year analysis
+- Power BI dashboard
 - Technical documentation
 
 The project is continuously evolving as new engineering and analytical capabilities are added.
