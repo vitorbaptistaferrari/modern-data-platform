@@ -1,41 +1,41 @@
 """
-Gold Layer - Dimension Revenue Hierarchy
+Gold Layer - Revenue Hierarchy Dimension
 ========================================
 
-Builds the Revenue Hierarchy dimension for analytical revenue
-classification.
+Builds the Revenue Hierarchy dimension from the Silver opportunity dataset.
 
-The hierarchy organizes revenue into the following structure:
+The hierarchy supports both aggregated analytical classifications
+and detailed revenue classifications.
+
+Hierarchy:
 
 Revenue
 ├── Prospecting
+│   └── Prospecting
 ├── Renewal
+│   └── Renewal
 └── Expansion
+    ├── Expansion
     ├── Cross-Sell
     └── Up-Sell
 
-For the synthetic environment, Expansion is classified using
-the following deterministic business rule:
-
-- Alpha   -> Cross-Sell
-- Beta    -> Up-Sell
-- Gamma   -> Up-Sell
-
-This rule is intentionally synthetic and does not reproduce
-any proprietary production rule.
+The aggregated Expansion member is required so that target data can
+reference the Expansion level, while revenue data can reference the
+more detailed Cross-Sell and Up-Sell levels.
 
 Responsibilities:
 
 - Read standardized Silver data
-- Build the analytical revenue hierarchy
-- Apply synthetic business rules
-- Validate hierarchy combinations
+- Validate the source structure
+- Standardize analytical classifications
+- Apply synthetic hierarchy rules
+- Include aggregated and detailed hierarchy members
 - Generate deterministic surrogate keys
 - Add a standard N/A member
 - Persist the Gold dimension
 
-Revenue calculation itself is intentionally excluded from
-this dimension and will be implemented in Fact Revenue.
+The implementation uses synthetic business rules and does not contain
+proprietary production information.
 """
 
 from hashlib import sha256
@@ -44,20 +44,8 @@ from pathlib import Path
 import pandas as pd
 
 
-# ----------------------------------------------------------------------
-# CONFIGURATION
-# ----------------------------------------------------------------------
-
-SILVER_PATH = Path(
-    "data/silver/opportunities.parquet"
-)
-
-GOLD_PATH = Path(
-    "data/gold/dim_revenue_hierarchy.parquet"
-)
-
-SOURCE_TABLE = "opportunities"
-
+SILVER_PATH = Path("data/silver/opportunities.parquet")
+GOLD_PATH = Path("data/gold/dim_revenue_hierarchy.parquet")
 
 EXPECTED_COLUMNS = [
     "opportunity_type",
@@ -65,9 +53,12 @@ EXPECTED_COLUMNS = [
 ]
 
 
-# ----------------------------------------------------------------------
-# BUSINESS RULES
-# ----------------------------------------------------------------------
+OPPORTUNITY_TYPE_MAPPING = {
+    "Prospecting": "Prospecting",
+    "Retention": "Renewal",
+    "Expansion": "Expansion",
+}
+
 
 EXPANSION_BRAND_MAPPING = {
     "Alpha": "Cross-Sell",
@@ -76,24 +67,8 @@ EXPANSION_BRAND_MAPPING = {
 }
 
 
-NEGOTIATION_TYPE_MAPPING = {
-    "Prospecting": "Prospecting",
-    "Retention": "Renewal",
-    "Expansion": "Expansion",
-}
-
-
-# ----------------------------------------------------------------------
-# VALIDATION
-# ----------------------------------------------------------------------
-
-def validate_columns(
-    df: pd.DataFrame,
-) -> None:
-    """
-    Validate whether the source contains all required columns.
-    """
-
+def validate_columns(df):
+    """Validate the required source columns."""
     missing_columns = [
         column
         for column in EXPECTED_COLUMNS
@@ -107,249 +82,166 @@ def validate_columns(
         )
 
 
-# ----------------------------------------------------------------------
-# STANDARDIZATION
-# ----------------------------------------------------------------------
-
-def standardize_source_values(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    Standardize source values before applying business rules.
-    """
-
+def standardize_source(df):
+    """Standardize source values used by the hierarchy."""
     df = df.copy()
 
-    df["opportunity_type"] = (
-        df["opportunity_type"]
-        .astype("string")
-        .str.strip()
-        .str.title()
-    )
-
-    df["brand"] = (
-        df["brand"]
-        .astype("string")
-        .str.strip()
-        .str.title()
-    )
+    for column in EXPECTED_COLUMNS:
+        df[column] = (
+            df[column]
+            .astype("string")
+            .str.strip()
+            .str.title()
+        )
 
     return df
 
 
-# ----------------------------------------------------------------------
-# HIERARCHY GENERATION
-# ----------------------------------------------------------------------
+def map_opportunity_type(df):
+    """Map source opportunity types to analytical negotiation types."""
+    df = df.copy()
 
-def build_revenue_hierarchy(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    Build the analytical revenue hierarchy combinations.
-
-    The hierarchy is generated from the distinct combinations
-    required by the synthetic business rules.
-    """
-
-    source = (
-        df[
-            [
-                "opportunity_type",
-                "brand",
-            ]
-        ]
-        .drop_duplicates()
-        .reset_index(drop=True)
+    df["negotiation_type"] = df["opportunity_type"].map(
+        OPPORTUNITY_TYPE_MAPPING
     )
 
-    source["negotiation_type"] = (
-        source["opportunity_type"]
-        .map(
-            NEGOTIATION_TYPE_MAPPING
-        )
-    )
-
-    source["revenue_level_1"] = (
-        "Revenue"
-    )
-
-    source["revenue_level_2"] = (
-        source["negotiation_type"]
-    )
-
-    source["revenue_level_3"] = (
-        source["negotiation_type"]
-    )
-
-    expansion_mask = (
-        source["negotiation_type"]
-        == "Expansion"
-    )
-
-    source.loc[
-        expansion_mask,
-        "revenue_level_3",
-    ] = (
-        source.loc[
-            expansion_mask,
-            "brand",
-        ]
-        .map(
-            EXPANSION_BRAND_MAPPING
-        )
-    )
-
-    return source
-
-
-# ----------------------------------------------------------------------
-# QUALITY RULES
-# ----------------------------------------------------------------------
-
-def validate_business_mapping(
-    df: pd.DataFrame,
-) -> None:
-    """
-    Validate that all source classifications can be resolved.
-    """
-
-    invalid_negotiation_types = (
+    unmapped_values = (
         df.loc[
             df["negotiation_type"].isna(),
             "opportunity_type",
         ]
-        .drop_duplicates()
+        .dropna()
+        .unique()
         .tolist()
     )
 
-    if invalid_negotiation_types:
+    if unmapped_values:
         raise ValueError(
             "Unmapped opportunity types found: "
-            f"{invalid_negotiation_types}"
+            f"{unmapped_values}"
         )
 
-    expansion_without_level = df[
-        (
-            df["negotiation_type"]
-            == "Expansion"
-        )
-        & (
-            df["revenue_level_3"]
-            .isna()
-        )
-    ]
+    return df
 
-    if not expansion_without_level.empty:
-        invalid_brands = (
-            expansion_without_level[
-                "brand"
-            ]
-            .drop_duplicates()
-            .tolist()
-        )
 
+def build_hierarchy_records(df):
+    """
+    Build the hierarchy members required by the analytical model.
+
+    The aggregated Expansion member is created explicitly because
+    targets are analyzed at the Expansion level, while revenue can
+    be analyzed at Cross-Sell or Up-Sell level.
+    """
+
+    records = []
+
+    for negotiation_type in sorted(
+        df["negotiation_type"].dropna().unique()
+    ):
+        if negotiation_type == "Expansion":
+            records.append(
+                {
+                    "revenue_level_1": "Revenue",
+                    "revenue_level_2": "Expansion",
+                    "revenue_level_3": "Expansion",
+                }
+            )
+
+            expansion_brands = sorted(
+                df.loc[
+                    df["negotiation_type"] == "Expansion",
+                    "brand",
+                ]
+                .dropna()
+                .unique()
+            )
+
+            for brand in expansion_brands:
+                detailed_level = EXPANSION_BRAND_MAPPING.get(
+                    brand
+                )
+
+                if detailed_level is None:
+                    raise ValueError(
+                        "No synthetic hierarchy mapping found "
+                        f"for Expansion brand: {brand}"
+                    )
+
+                records.append(
+                    {
+                        "revenue_level_1": "Revenue",
+                        "revenue_level_2": "Expansion",
+                        "revenue_level_3": detailed_level,
+                    }
+                )
+
+        else:
+            records.append(
+                {
+                    "revenue_level_1": "Revenue",
+                    "revenue_level_2": negotiation_type,
+                    "revenue_level_3": negotiation_type,
+                }
+            )
+
+    hierarchy = pd.DataFrame(records)
+
+    if hierarchy.empty:
         raise ValueError(
-            "Expansion brands without a "
-            "revenue hierarchy mapping: "
-            f"{invalid_brands}"
+            "No revenue hierarchy records were generated."
         )
 
-
-def remove_duplicates(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    Keep one record per analytical hierarchy combination.
-    """
-
-    hierarchy_columns = [
-        "revenue_level_1",
-        "revenue_level_2",
-        "revenue_level_3",
-    ]
-
-    return (
-        df[
-            hierarchy_columns
+    hierarchy = hierarchy.drop_duplicates(
+        subset=[
+            "revenue_level_1",
+            "revenue_level_2",
+            "revenue_level_3",
         ]
-        .drop_duplicates()
-        .reset_index(drop=True)
-    )
+    ).reset_index(drop=True)
+
+    return hierarchy
 
 
-# ----------------------------------------------------------------------
-# SURROGATE KEY
-# ----------------------------------------------------------------------
-
-def generate_surrogate_key(
-    level_1: str,
-    level_2: str,
-    level_3: str,
-) -> str:
-    """
-    Generate a deterministic surrogate key based on
-    the complete hierarchy path.
-    """
-
-    hierarchy_path = "|".join(
+def generate_surrogate_key(level_1, level_2, level_3):
+    """Generate a deterministic SHA-256 surrogate key."""
+    normalized_value = "|".join(
         [
-            str(level_1).strip(),
-            str(level_2).strip(),
-            str(level_3).strip(),
+            str(level_1).strip().upper(),
+            str(level_2).strip().upper(),
+            str(level_3).strip().upper(),
         ]
     )
 
     return sha256(
-        hierarchy_path
-        .upper()
-        .encode("utf-8")
+        normalized_value.encode("utf-8")
     ).hexdigest()
 
 
-def add_surrogate_key(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    Add the revenue hierarchy surrogate key.
-    """
-
+def add_surrogate_key(df):
+    """Add the deterministic hierarchy surrogate key."""
     df = df.copy()
 
-    df["revenue_hierarchy_sk"] = (
-        df.apply(
-            lambda row: generate_surrogate_key(
-                row["revenue_level_1"],
-                row["revenue_level_2"],
-                row["revenue_level_3"],
-            ),
-            axis=1,
-        )
+    df["revenue_hierarchy_sk"] = df.apply(
+        lambda row: generate_surrogate_key(
+            row["revenue_level_1"],
+            row["revenue_level_2"],
+            row["revenue_level_3"],
+        ),
+        axis=1,
     )
 
     return df
 
 
-# ----------------------------------------------------------------------
-# STANDARD N/A MEMBER
-# ----------------------------------------------------------------------
-
-def add_unknown_member(
-    df: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    Add a standard N/A member used when the revenue hierarchy
-    cannot be resolved.
-    """
-
+def add_unknown_member(df):
+    """Add the standard unknown member."""
     unknown_record = pd.DataFrame(
         [
             {
-                "revenue_hierarchy_sk": (
-                    generate_surrogate_key(
-                        "N/A",
-                        "N/A",
-                        "N/A",
-                    )
+                "revenue_hierarchy_sk": generate_surrogate_key(
+                    "N/A",
+                    "N/A",
+                    "N/A",
                 ),
                 "revenue_level_1": "N/A",
                 "revenue_level_2": "N/A",
@@ -374,17 +266,55 @@ def add_unknown_member(
     )
 
 
-# ----------------------------------------------------------------------
-# PERSISTENCE
-# ----------------------------------------------------------------------
+def validate_hierarchy(df):
+    """Validate the final hierarchy structure."""
+    required_members = {
+        (
+            "Revenue",
+            "Prospecting",
+            "Prospecting",
+        ),
+        (
+            "Revenue",
+            "Renewal",
+            "Renewal",
+        ),
+        (
+            "Revenue",
+            "Expansion",
+            "Expansion",
+        ),
+        (
+            "Revenue",
+            "Expansion",
+            "Cross-Sell",
+        ),
+        (
+            "Revenue",
+            "Expansion",
+            "Up-Sell",
+        ),
+    }
 
-def save_gold(
-    df: pd.DataFrame,
-) -> None:
-    """
-    Persist the Gold dimension as Parquet.
-    """
+    actual_members = set(
+        zip(
+            df["revenue_level_1"],
+            df["revenue_level_2"],
+            df["revenue_level_3"],
+        )
+    )
 
+    missing_members = required_members - actual_members
+
+    if missing_members:
+        raise ValueError(
+            "Required revenue hierarchy members are missing: "
+            f"{sorted(missing_members)}"
+        )
+
+
+def save_gold(df):
+    """Persist the Gold dimension."""
     GOLD_PATH.parent.mkdir(
         parents=True,
         exist_ok=True,
@@ -400,20 +330,12 @@ def save_gold(
     )
 
 
-# ----------------------------------------------------------------------
-# PIPELINE
-# ----------------------------------------------------------------------
-
-def process_dim_revenue_hierarchy() -> pd.DataFrame:
-    """
-    Execute the complete Gold transformation
-    for the Revenue Hierarchy dimension.
-    """
+def process_dim_revenue_hierarchy():
+    """Build the Revenue Hierarchy Gold dimension."""
 
     if not SILVER_PATH.exists():
         raise FileNotFoundError(
-            f"Silver dataset not found: "
-            f"{SILVER_PATH}"
+            f"Silver dataset not found: {SILVER_PATH}"
         )
 
     df = pd.read_parquet(
@@ -429,27 +351,20 @@ def process_dim_revenue_hierarchy() -> pd.DataFrame:
         f"Silver records: {len(df)}"
     )
 
-    validate_columns(
-        df
-    )
+    validate_columns(df)
 
-    df = standardize_source_values(
-        df
-    )
+    df = standardize_source(df)
 
-    hierarchy = (
-        build_revenue_hierarchy(
-            df
-        )
-    )
+    df = df[
+        df["opportunity_type"].notna()
+        & (df["opportunity_type"] != "")
+        & df["brand"].notna()
+        & (df["brand"] != "")
+    ]
 
-    validate_business_mapping(
-        hierarchy
-    )
+    df = map_opportunity_type(df)
 
-    hierarchy = remove_duplicates(
-        hierarchy
-    )
+    hierarchy = build_hierarchy_records(df)
 
     hierarchy = add_surrogate_key(
         hierarchy
@@ -468,6 +383,10 @@ def process_dim_revenue_hierarchy() -> pd.DataFrame:
         ]
     ]
 
+    validate_hierarchy(
+        hierarchy
+    )
+
     save_gold(
         hierarchy
     )
@@ -476,27 +395,31 @@ def process_dim_revenue_hierarchy() -> pd.DataFrame:
         f"Gold records: {len(hierarchy)}"
     )
 
-    return hierarchy
-
-
-# ----------------------------------------------------------------------
-# MAIN
-# ----------------------------------------------------------------------
-
-if __name__ == "__main__":
-
     print(
-        "Gold Layer - "
-        "Dimension Revenue Hierarchy"
+        "\nRevenue hierarchy:"
     )
 
     print(
-        "============================"
+        hierarchy.to_string(
+            index=False
+        )
+    )
+
+    return hierarchy
+
+
+if __name__ == "__main__":
+    print(
+        "Gold Layer - Revenue Hierarchy Dimension"
+    )
+
+    print(
+        "========================================="
     )
 
     process_dim_revenue_hierarchy()
 
     print(
-        "\nRevenue Hierarchy dimension "
+        "\nRevenue hierarchy dimension "
         "created successfully."
     )
