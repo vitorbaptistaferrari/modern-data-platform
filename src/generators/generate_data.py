@@ -54,3 +54,106 @@ if __name__ == "__main__":
     print(f"Users: {config.n_users}")
     print(f"Opportunities: {config.n_opportunities}")
     print(f"Seed: {config.seed}")
+
+import random
+import string
+
+import pandas as pd
+
+
+def generate_customers(config: GeneratorConfig) -> pd.DataFrame:
+    """
+    Generate synthetic customer records.
+
+    The generated customers represent organizations that may
+    participate in the revenue lifecycle.
+    """
+
+    random.seed(config.seed)
+
+    states = [
+        "SP",
+        "RJ",
+        "MG",
+        "PR",
+        "SC",
+        "RS",
+        "BA",
+        "PE",
+        "GO",
+        "ES",
+    ]
+
+    cities_by_state = {
+        "SP": ["São Paulo", "Campinas", "Santos", "Sorocaba"],
+        "RJ": ["Rio de Janeiro", "Niterói", "Petrópolis"],
+        "MG": ["Belo Horizonte", "Uberlândia", "Juiz de Fora"],
+        "PR": ["Curitiba", "Londrina", "Maringá"],
+        "SC": ["Florianópolis", "Joinville", "Blumenau"],
+        "RS": ["Porto Alegre", "Caxias do Sul", "Pelotas"],
+        "BA": ["Salvador", "Feira de Santana", "Vitória da Conquista"],
+        "PE": ["Recife", "Olinda", "Caruaru"],
+        "GO": ["Goiânia", "Anápolis", "Aparecida de Goiânia"],
+        "ES": ["Vitória", "Vila Velha", "Serra"],
+    }
+
+    customer_segments = [
+        "Small",
+        "Medium",
+        "Large",
+    ]
+
+    customer_status = [
+        "Active",
+        "Inactive",
+    ]
+
+    records = []
+
+    for i in range(1, config.n_customers + 1):
+        state = random.choice(states)
+        city = random.choice(cities_by_state[state])
+
+        records.append(
+            {
+                "customer_id": f"CUST-{i:06d}",
+                "customer_name": f"Customer {i:06d}",
+                "tax_id": "".join(
+                    random.choices(
+                        string.digits,
+                        k=14,
+                    )
+                ),
+                "city": city,
+                "state": state,
+                "segment": random.choice(customer_segments),
+                "status": random.choice(customer_status),
+            }
+        )
+
+    return pd.DataFrame(records)
+
+    customers = generate_customers(config)
+
+    print("\nGenerated customers:")
+    print(customers.head())
+
+    print(f"\nTotal customers: {len(customers)}")
+
+if __name__ == "__main__":
+    config = DEFAULT_CONFIG
+
+    print("Synthetic Data Generator")
+    print("------------------------")
+    print(f"Period: {config.start_date} → {config.end_date}")
+    print(f"Customers: {config.n_customers}")
+    print(f"Users: {config.n_users}")
+    print(f"Opportunities: {config.n_opportunities}")
+    print(f"Seed: {config.seed}")
+
+    customers = generate_customers(config)
+
+    print("\nGenerated customers:")
+    print(customers.head())
+
+    print(f"\nTotal customers: {len(customers)}")
