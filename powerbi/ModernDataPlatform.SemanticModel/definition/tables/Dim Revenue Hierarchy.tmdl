@@ -1,0 +1,45 @@
+table 'Dim Revenue Hierarchy'
+	lineageTag: b010077c-b3a3-4832-84e2-c43fec39530c
+
+	column revenue_hierarchy_sk
+		dataType: string
+		lineageTag: 78b4939d-38c7-444b-b5cd-f7e3eccebbe2
+		summarizeBy: none
+		sourceColumn: revenue_hierarchy_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column level_1
+		dataType: string
+		lineageTag: a9f7aba9-c7c3-476a-a325-ae2706f76eb2
+		summarizeBy: none
+		sourceColumn: level_1
+
+		annotation SummarizationSetBy = Automatic
+
+	column level_2
+		dataType: string
+		lineageTag: 88289b4c-4f1f-487c-a864-26aeb6b00e0d
+		summarizeBy: none
+		sourceColumn: level_2
+
+		annotation SummarizationSetBy = Automatic
+
+	column level_3
+		dataType: string
+		lineageTag: 7bcc50cc-4b46-4cbd-9e94-911796747725
+		summarizeBy: none
+		sourceColumn: level_3
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dim Revenue Hierarchy' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WCvLQNTAwVNJRCkotS80rTQWyAoryiwtSk0sy89LReLE6UA1GKBqCUvNSyxNzkFhwhcYoCl0rChLzijPz81DYcMUmOBU7Ax1RrBucmoNktClO1aEFCKV+jkClBkBBP31HFDI2FgA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [revenue_hierarchy_sk = _t, level_1 = _t, level_2 = _t, level_3 = _t])
+				in
+				  Origem
+
+	annotation PBI_ResultType = Table
+

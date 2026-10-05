@@ -1,0 +1,88 @@
+table 'Dim Calendar'
+	lineageTag: 770cd2cd-4e6c-496e-9d21-17e84d260d8a
+
+	column calendar_sk
+		dataType: string
+		lineageTag: 6186b59b-9c82-4c3d-9e83-1e69ec4ba08f
+		summarizeBy: none
+		sourceColumn: calendar_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: ac969b53-1b35-4412-aa39-03ab8f83377e
+		summarizeBy: none
+		sourceColumn: date
+
+		variation Variation
+			isDefault
+			relationship: cc413207-fe89-47f8-baa7-2577e06336b2
+			defaultHierarchy: LocalDateTable_65beffcb-1d32-48f6-b865-8c3adb50d378.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: cfe648ba-42fe-4ace-8148-7a36cbefea68
+		summarizeBy: sum
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: 2f6b1316-1bca-4f4f-8272-ec89197ba6f2
+		summarizeBy: sum
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_name
+		dataType: string
+		lineageTag: ade12b3a-b323-4bc8-96c8-6319d8d5944c
+		summarizeBy: none
+		sourceColumn: month_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_year
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 47b55f32-1b0d-4758-a993-41ba991e8c15
+		summarizeBy: none
+		sourceColumn: month_year
+
+		variation Variation
+			isDefault
+			relationship: c25a4ee1-d418-4abe-a679-1907b7ea9420
+			defaultHierarchy: LocalDateTable_88649925-44bd-40c5-8cd9-9461cf0566d7.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column quarter
+		dataType: string
+		lineageTag: cddadc0e-8957-49d9-91d4-49fd5a5887dc
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dim Calendar' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45Wcnb00TUyMDLTNTAEIiUdJQwOkAIxvRLzShOLKhEqgKxAQ6VYHWQzjJDNMEIxwwiI3VKTilAMMcJmiDGyIcYohhgDsW9iUXIGQh6bCSbIJpigmGACxI4FRZk5CHmQCUZKsbEA", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [calendar_sk = _t, date = _t, year = _t, month = _t, month_name = _t, month_year = _t, quarter = _t]),
+				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(Origem, {{"calendar_sk", type text}, {"date", type date}, {"year", Int64.Type}, {"month", Int64.Type}, {"month_name", type text}, {"month_year", type date}, {"quarter", type text}})
+				in
+				  #"Tipo de coluna alterado"
+
+	annotation PBI_ResultType = Table
+

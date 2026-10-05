@@ -1,0 +1,65 @@
+table 'Dim Opportunity Stage'
+	lineageTag: 7c391bf6-1f6a-4271-b2cd-700a87994bec
+
+	column opportunity_stage_sk
+		dataType: string
+		lineageTag: 32887483-43c0-4c61-b2f8-2bbce18a97a9
+		summarizeBy: none
+		sourceColumn: opportunity_stage_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column stage_id
+		dataType: string
+		lineageTag: 1549c936-0adf-4cad-a5f2-9c0c82308c18
+		summarizeBy: none
+		sourceColumn: stage_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column stage_name
+		dataType: string
+		lineageTag: cde4b2b5-3284-4881-ba65-5d3c4e17afd7
+		summarizeBy: none
+		sourceColumn: stage_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column stage_order
+		dataType: int64
+		formatString: 0
+		lineageTag: 396458c6-cfc3-458f-8ce2-0e4e7fe0d053
+		summarizeBy: none
+		sourceColumn: stage_order
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_closed
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 238e57db-ccfc-4282-93f0-934933111563
+		summarizeBy: none
+		sourceColumn: is_closed
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_won
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 021cf80c-405d-4ea4-8e06-002f83e33485
+		summarizeBy: none
+		sourceColumn: is_won
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dim Opportunity Stage' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WCg7RNTAwVNJRCoZQgaWJOZlpmcmJJZn5eUA+SMzN0SfYFU7H6kB1GUF0gaiAovyC/OLEHCDTCLcGY4gGEOWck1+cmqIQDrYDJBASFOoKo+AaTCAaTBAafPKLS4A8E4QOhB1+jkAtBkAhP31HOGmA6ZxYAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [opportunity_stage_sk = _t, stage_id = _t, stage_name = _t, stage_order = _t, is_closed = _t, is_won = _t]),
+				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(Origem, {{"opportunity_stage_sk", type text}, {"stage_id", type text}, {"stage_name", type text}, {"stage_order", Int64.Type}, {"is_closed", type logical}, {"is_won", type logical}})
+				in
+				  #"Tipo de coluna alterado"
+
+	annotation PBI_ResultType = Table
+

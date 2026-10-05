@@ -1,0 +1,71 @@
+table 'Fact Target'
+	lineageTag: 1f6f6a40-f016-4d93-a955-dd9fba7f199e
+
+	column target_fact_sk
+		dataType: string
+		lineageTag: 8f8aae91-b763-40d3-8a3b-1616fd0f5aae
+		summarizeBy: none
+		sourceColumn: target_fact_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column calendar_sk
+		dataType: string
+		lineageTag: 53d5e47e-ab03-4cfb-9580-e06c916f1bf4
+		summarizeBy: none
+		sourceColumn: calendar_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column brand_sk
+		dataType: string
+		lineageTag: 8b878c9a-683d-4dac-ac60-2cb683a142f9
+		summarizeBy: none
+		sourceColumn: brand_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column target_type_sk
+		dataType: string
+		lineageTag: 949d926f-8d5c-433e-a9bd-4143eb187620
+		summarizeBy: none
+		sourceColumn: target_type_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column revenue_hierarchy_sk
+		dataType: string
+		lineageTag: b6aa9c02-e84a-45bd-be99-c4e86b328b0d
+		summarizeBy: none
+		sourceColumn: revenue_hierarchy_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column nature
+		dataType: string
+		lineageTag: f2e6fe4c-b8be-4f95-80dd-9d5ba60e2440
+		summarizeBy: none
+		sourceColumn: nature
+
+		annotation SummarizationSetBy = Automatic
+
+	column target_value
+		dataType: int64
+		formatString: 0
+		lineageTag: 86d321bc-7094-42e3-954f-d32852c7fdc2
+		summarizeBy: sum
+		sourceColumn: target_value
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Fact Target' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WCnEM0jUwMFTSUXJ29NE1MjAy0zUw1AULOMFkQkKgjCAPmEhiUXpqCZBhaGQABEqxOjCTjFBMMiLBJGM0k4xxmmQEM8kIZpIRskmWaAaZoBhkjM1JxjCDjFGcZIBmkimKSSZIJhkTCiZTsEmxAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [target_fact_sk = _t, calendar_sk = _t, brand_sk = _t, target_type_sk = _t, revenue_hierarchy_sk = _t, nature = _t, target_value = _t]),
+				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(Origem, {{"target_fact_sk", type text}, {"calendar_sk", type text}, {"brand_sk", type text}, {"target_type_sk", type text}, {"revenue_hierarchy_sk", type text}, {"nature", type text}, {"target_value", Int64.Type}})
+				in
+				  #"Tipo de coluna alterado"
+
+	annotation PBI_ResultType = Table
+

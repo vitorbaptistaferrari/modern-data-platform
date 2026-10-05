@@ -11,5 +11,24 @@ annotation __PBI_TimeIntelligenceEnabled = 1
 
 annotation PBI_ProTooling = ["DevMode"]
 
+annotation PBI_QueryOrder = ["Dim Brand","Dim User","Dim Opportunity Stage","Dim Negotiation Type","Dim Target Type","Dim Revenue Hierarchy","Dim Opportunity","Dim Calendar","Fact Revenue","Fact Target"]
+
+ref table 'Dim Brand'
+ref table 'Dim User'
+ref table 'Dim Opportunity Stage'
+ref table 'Dim Negotiation Type'
+ref table 'Dim Target Type'
+ref table 'Dim Revenue Hierarchy'
+ref table 'Dim Opportunity'
+ref table DateTableTemplate_974aa2ef-974e-40a6-bb67-d63c8388a5c4
+ref table LocalDateTable_d328488e-91df-45df-8f77-78c5cd751b85
+ref table LocalDateTable_1ee42855-a996-43f6-b7f2-fb839ee5118d
+ref table 'Dim Calendar'
+ref table LocalDateTable_65beffcb-1d32-48f6-b865-8c3adb50d378
+ref table LocalDateTable_88649925-44bd-40c5-8cd9-9461cf0566d7
+ref table 'Fact Revenue'
+ref table 'Fact Target'
+ref table Medidas
+
 ref cultureInfo pt-BR
 

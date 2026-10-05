@@ -1,0 +1,29 @@
+table 'Dim Negotiation Type'
+	lineageTag: 52eeff1e-3997-4d10-97f9-6539ddf007fd
+
+	column negotiation_type_sk
+		dataType: string
+		lineageTag: b1a21e8c-0a38-4bf7-873c-24cb7c33ee2f
+		summarizeBy: none
+		sourceColumn: negotiation_type_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column negotiation_type
+		dataType: string
+		lineageTag: 31e58ad8-c0b0-4c7a-9da5-45198bd9e89e
+		summarizeBy: none
+		sourceColumn: negotiation_type
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dim Negotiation Type' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45W8gvRNTAwVNJRCijKLy5ITS7JzEtXitWBShgBJYJS81LLE3MQgsZAQdeKgsS84sz8PIiwI1DYACjsp++oFBsLAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [negotiation_type_sk = _t, negotiation_type = _t])
+				in
+				  Origem
+
+	annotation PBI_ResultType = Table
+

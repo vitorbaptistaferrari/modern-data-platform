@@ -1,0 +1,29 @@
+table 'Dim Target Type'
+	lineageTag: 0e7e677b-9257-40bc-a370-05855987fa7e
+
+	column target_type_sk
+		dataType: string
+		lineageTag: 8392d59d-4e38-4370-bed4-231995bc13bd
+		summarizeBy: none
+		sourceColumn: target_type_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column target_type
+		dataType: string
+		lineageTag: 387110c8-04ce-45e7-9a34-cc372bf3a60b
+		summarizeBy: none
+		sourceColumn: target_type
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dim Target Type' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WCgnRNTAwVNJRCijKLy5ITS7JzEtXitWBShgBJYJS81LLE3MQgsZAQdeKgsS84sz8PLCwnyNQ2AAo7KfvqBQbCwA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [target_type_sk = _t, target_type = _t])
+				in
+				  Origem
+
+	annotation PBI_ResultType = Table
+

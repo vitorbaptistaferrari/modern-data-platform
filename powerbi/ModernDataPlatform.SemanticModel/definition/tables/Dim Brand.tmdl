@@ -1,0 +1,39 @@
+table 'Dim Brand'
+	lineageTag: 2b451888-246d-4218-8e4d-225c50bd7a33
+
+	column brand_sk
+		dataType: string
+		lineageTag: 6d5a8ee1-7f22-458f-85ae-d2d957ee3954
+		summarizeBy: none
+		sourceColumn: brand_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column brand_name
+		dataType: string
+		lineageTag: bd3da550-99e1-4530-98a1-019fcfd1a649
+		summarizeBy: none
+		sourceColumn: brand_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_active
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: f7fdf414-84f1-4bda-8a74-a667a5ec38e3
+		summarizeBy: none
+		sourceColumn: is_active
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dim Brand' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WcgrSNTAwVNJRcswpyEgE0iFBoa5KsTpQGSOgiFNqCaaEMVDEPTE3F0XGzxEoYwAU8dN3hIvHAgA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [brand_sk = _t, brand_name = _t, is_active = _t]),
+				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(Origem, {{"brand_sk", type text}, {"brand_name", type text}, {"is_active", type logical}})
+				in
+				  #"Tipo de coluna alterado"
+
+	annotation PBI_ResultType = Table
+

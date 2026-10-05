@@ -1,0 +1,164 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 186.94468746434518,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 626.74197523190026,
+            "y": 231.10345075224802
+          },
+          "nodeIndex": "Dim Brand",
+          "nodeLineageTag": "2b451888-246d-4218-8e4d-225c50bd7a33",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 626.716046875119,
+            "y": 437.74268782040565
+          },
+          "nodeIndex": "Dim Calendar",
+          "nodeLineageTag": "770cd2cd-4e6c-496e-9d21-17e84d260d8a",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1061.8099522406833,
+            "y": 871.65956103383814
+          },
+          "nodeIndex": "Dim Negotiation Type",
+          "nodeLineageTag": "52eeff1e-3997-4d10-97f9-6539ddf007fd",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 915.87066908534666,
+            "y": -50
+          },
+          "nodeIndex": "Dim Opportunity",
+          "nodeLineageTag": "f1b1aea9-0388-409f-a216-5dfa5dcee336",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1206.6215205450885,
+            "y": 313.83986755663415
+          },
+          "nodeIndex": "Dim Opportunity Stage",
+          "nodeLineageTag": "7c391bf6-1f6a-4271-b2cd-700a87994bec",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 626.73223730593463,
+            "y": 740.0863051106536
+          },
+          "nodeIndex": "Dim Revenue Hierarchy",
+          "nodeLineageTag": "b010077c-b3a3-4832-84e2-c43fec39530c",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 440.77335359296291
+          },
+          "nodeIndex": "Dim Target Type",
+          "nodeLineageTag": "0e7e677b-9257-40bc-a370-05855987fa7e",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1270.6040153425129,
+            "y": 592.94183708351056
+          },
+          "nodeIndex": "Dim User",
+          "nodeLineageTag": "43ac1edb-6fb9-49b4-91b5-d487d146eb61",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 916.6711220461068,
+            "y": 479.59745571086813
+          },
+          "nodeIndex": "Fact Revenue",
+          "nodeLineageTag": "c87753fc-ceff-4f59-9055-f6b49fbc0c30",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 336.81432572345676,
+            "y": 366.74709404132818
+          },
+          "nodeIndex": "Fact Target",
+          "nodeLineageTag": "1f6f6a40-f016-4d93-a955-dd9fba7f199e",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1504.6040153425129,
+            "y": 424.82978051691907
+          },
+          "nodeIndex": "Medidas",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "Todas as tabelas",
+      "zoomValue": 63.287087723234059,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "Todas as tabelas",
+  "defaultDiagram": "Todas as tabelas"
+}

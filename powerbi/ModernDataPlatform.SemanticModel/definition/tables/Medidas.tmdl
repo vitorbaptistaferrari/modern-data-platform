@@ -1,0 +1,121 @@
+table Medidas
+	lineageTag: dba9e408-6a96-43a5-a70a-b9881c3d3506
+
+	measure Revenue =
+			
+			SUM ( 'Fact Revenue'[revenue_value] )
+		formatString: 0
+		lineageTag: 2ac969f0-352f-44d9-8be9-8b88fc90688e
+
+	measure Target =
+			
+			SUM ( 'Fact Target'[target_value] )
+		formatString: 0
+		lineageTag: 17fe7446-317b-4709-8e21-7d9e882eb5f2
+
+	measure 'Achievement %' =
+			
+			DIVIDE ( [Revenue], [Target] )
+		lineageTag: f440bf1e-2a02-4f4c-9a7b-ef8f3f07494f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Revenue YTD' =
+			
+			CALCULATE (
+			    [Revenue],
+			    DATESYTD ( 'Dim Calendar'[date] )
+			)
+		formatString: 0
+		lineageTag: 171520dd-9e60-4a1a-b0ab-e170a9968b87
+
+	measure 'Target YTD' =
+			
+			CALCULATE (
+			    [Target],
+			    DATESYTD ( 'Dim Calendar'[date] )
+			)
+		formatString: 0
+		lineageTag: 97e91865-08b7-493c-8b24-8fd89c374d97
+
+	measure 'Revenue LY' =
+			
+			CALCULATE (
+			    [Revenue],
+			    SAMEPERIODLASTYEAR ( 'Dim Calendar'[date] )
+			)
+		formatString: 0
+		lineageTag: 2bfe358a-e19f-41e2-8339-bb569403371b
+
+	measure 'Revenue LY YTD' =
+			
+			CALCULATE (
+			    [Revenue YTD],
+			    SAMEPERIODLASTYEAR ( 'Dim Calendar'[date] )
+			)
+		formatString: 0
+		lineageTag: 17ecff4b-26c6-447c-bc96-4af0224575d8
+
+	measure 'Revenue YoY' =
+			
+			DIVIDE (
+			    [Revenue] - [Revenue LY],
+			    [Revenue LY],
+			    0
+			)
+		lineageTag: ed3ff6f8-b81d-4910-947a-0c469bff0764
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Revenue YoY YTD' =
+			
+			DIVIDE (
+			    [Revenue YTD] - [Revenue LY YTD],
+			    [Revenue LY YTD],
+			    0
+			)
+		lineageTag: cb0ebf0c-9740-4371-b87b-439f6dd7cb19
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Revenue Variance' =
+			
+			[Revenue] - [Target]
+		formatString: 0
+		lineageTag: 50abf856-4937-45ed-95d5-2c87044ae5fc
+
+	measure 'Revenue Target Variance YTD' =
+			
+			[Revenue YTD] - [Target YTD]
+		formatString: 0
+		lineageTag: fb9b65bd-763b-4f71-a311-936ed5efe957
+
+	measure 'Achievement YTD' =
+			
+			DIVIDE (
+			    [Revenue YTD],
+			    [Target YTD],
+			    0
+			)
+		lineageTag: 00c1dc68-60a0-4f93-b9f8-fbf89cb15b55
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Column
+		isHidden
+		formatString: 0
+		lineageTag: b310c947-c6ec-41ac-b831-64d447ee2dd5
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Column]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Medidas = calculated
+		mode: import
+		source = Row("Column", BLANK())
+
+	annotation PBI_Id = 5805134d36e04fee97e7b8a9eceb46ed
+
+	annotation 436ba87b-9c83-4389-a31b-ebd06a36be98 = {"Expression":""}
+

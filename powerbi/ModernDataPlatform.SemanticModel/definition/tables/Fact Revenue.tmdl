@@ -1,0 +1,87 @@
+table 'Fact Revenue'
+	lineageTag: c87753fc-ceff-4f59-9055-f6b49fbc0c30
+
+	column revenue_sk
+		dataType: string
+		lineageTag: fa780e28-9fbc-4c13-9916-8c4919e946c9
+		summarizeBy: none
+		sourceColumn: revenue_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column opportunity_sk
+		dataType: string
+		lineageTag: c2ccd2fe-27c0-4a90-b344-0d0752c92178
+		summarizeBy: none
+		sourceColumn: opportunity_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column user_sk
+		dataType: string
+		lineageTag: 182a1e08-fb79-4404-8394-5350859c2c2c
+		summarizeBy: none
+		sourceColumn: user_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column brand_sk
+		dataType: string
+		lineageTag: ff64c9ce-774b-4af8-a857-912a53436b92
+		summarizeBy: none
+		sourceColumn: brand_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column calendar_sk
+		dataType: string
+		lineageTag: d6291bc6-cd73-4da2-9a9f-ff5a03dae770
+		summarizeBy: none
+		sourceColumn: calendar_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column opportunity_stage_sk
+		dataType: string
+		lineageTag: 52a7c040-7dc7-46fe-935a-809491bea419
+		summarizeBy: none
+		sourceColumn: opportunity_stage_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column negotiation_type_sk
+		dataType: string
+		lineageTag: c68f0a6a-b956-4b70-a259-1e728fb68e90
+		summarizeBy: none
+		sourceColumn: negotiation_type_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column revenue_hierarchy_sk
+		dataType: string
+		lineageTag: 8ba5a61f-f85c-439a-ab1c-15f43f05d656
+		summarizeBy: none
+		sourceColumn: revenue_hierarchy_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column revenue_value
+		dataType: int64
+		formatString: 0
+		lineageTag: 1b2f7867-28e3-49ed-bd25-9f5524470345
+		summarizeBy: sum
+		sourceColumn: revenue_value
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Fact Revenue' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("hdDLCsIwEIXhd8m6gcmZxMtSRXAhKml1U/r+r2Fa5yyixex+2vBxmHF0+fzyIsF17v6wePYWx2xxOlw9BBsv8MuHfih/tMRtsCf5YhGQRMRNHW3QBm3QRtsG7Tn225pW0tqYrWu0ko4ldl+rI+lIWtdX/6fTfJEgtZ1op5+LaGXH9rX1s3t6Aw==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [revenue_sk = _t, opportunity_sk = _t, user_sk = _t, brand_sk = _t, calendar_sk = _t, opportunity_stage_sk = _t, negotiation_type_sk = _t, revenue_hierarchy_sk = _t, revenue_value = _t]),
+				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(Origem, {{"revenue_sk", type text}, {"opportunity_sk", type text}, {"user_sk", type text}, {"brand_sk", type text}, {"calendar_sk", type text}, {"opportunity_stage_sk", type text}, {"negotiation_type_sk", type text}, {"revenue_hierarchy_sk", type text}, {"revenue_value", Int64.Type}})
+				in
+				  #"Tipo de coluna alterado"
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,63 @@
+table 'Dim User'
+	lineageTag: 43ac1edb-6fb9-49b4-91b5-d487d146eb61
+
+	column user_sk
+		dataType: string
+		lineageTag: 68c9d68c-3c48-43e6-a9c1-aff85ecb359a
+		summarizeBy: none
+		sourceColumn: user_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column user_id
+		dataType: string
+		lineageTag: 4ca6115a-dd81-4268-b5b0-185cafcf2d1f
+		summarizeBy: none
+		sourceColumn: user_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column user_name
+		dataType: string
+		lineageTag: 4ba67894-004b-4053-92a9-3ce40a37a141
+		summarizeBy: none
+		sourceColumn: user_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column department
+		dataType: string
+		lineageTag: 58a5a789-e678-42c9-a05a-fe9d0e0c9026
+		summarizeBy: none
+		sourceColumn: department
+
+		annotation SummarizationSetBy = Automatic
+
+	column role
+		dataType: string
+		lineageTag: 7d93f7c4-f0b6-486d-a645-c495f057202f
+		summarizeBy: none
+		sourceColumn: role
+
+		annotation SummarizationSetBy = Automatic
+
+	column active
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 7a90ef89-6cff-406c-90ff-9f181d7355ad
+		summarizeBy: none
+		sourceColumn: active
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dim User' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WCg3WNTAwVNJRCoVQjjmpFQq++UXpiXlAXnBiTmoxSDQ5Ob80r0TBtSI1ubQksywVKBYSFOqqFKsDNcIIYgSI8sovSknMU/BJTSXJBGOICSAqJLEyJ79IITg3syQDyQwwreCbmJeYnlqErN/PEajfACjip++IlYSojAUA", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [user_sk = _t, user_id = _t, user_name = _t, department = _t, role = _t, active = _t]),
+				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(Origem, {{"user_sk", type text}, {"user_id", type text}, {"user_name", type text}, {"department", type text}, {"role", type text}, {"active", type logical}})
+				in
+				  #"Tipo de coluna alterado"
+
+	annotation PBI_ResultType = Table
+

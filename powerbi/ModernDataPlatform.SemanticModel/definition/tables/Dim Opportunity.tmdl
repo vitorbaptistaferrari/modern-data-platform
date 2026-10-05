@@ -1,0 +1,126 @@
+table 'Dim Opportunity'
+	lineageTag: f1b1aea9-0388-409f-a216-5dfa5dcee336
+
+	column opportunity_sk
+		dataType: string
+		lineageTag: 4171fd5d-f3a9-48ff-8fd5-8f72f40d6618
+		summarizeBy: none
+		sourceColumn: opportunity_sk
+
+		annotation SummarizationSetBy = Automatic
+
+	column opportunity_id
+		dataType: string
+		lineageTag: f0b80034-fed2-4f25-99a6-d513d1b591dd
+		summarizeBy: none
+		sourceColumn: opportunity_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_id
+		dataType: string
+		lineageTag: fcb13b51-2bfe-4912-850a-b2b810809771
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_name
+		dataType: string
+		lineageTag: 759c45ea-347f-40dc-b3fd-1afff0297f41
+		summarizeBy: none
+		sourceColumn: customer_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: ea15d705-1915-495a-90d1-760c9890491f
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column state
+		dataType: string
+		lineageTag: d3e52666-830d-4a33-a18f-0bb53d7d2d26
+		summarizeBy: none
+		sourceColumn: state
+
+		annotation SummarizationSetBy = Automatic
+
+	column segment
+		dataType: string
+		lineageTag: ed1b1c53-a6f8-4cc0-ae79-08c4bf13f46f
+		summarizeBy: none
+		sourceColumn: segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column opportunity_type
+		dataType: string
+		lineageTag: 0e28a36a-1ccd-4272-aed9-53769f7a687d
+		summarizeBy: none
+		sourceColumn: opportunity_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column brand
+		dataType: string
+		lineageTag: f5549395-141a-4ffd-9db3-c947ff7d1614
+		summarizeBy: none
+		sourceColumn: brand
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin
+		dataType: string
+		lineageTag: d1d30ae3-af75-46f5-8d9e-3901b5b7b57a
+		summarizeBy: none
+		sourceColumn: origin
+
+		annotation SummarizationSetBy = Automatic
+
+	column opportunity_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 85d43252-449c-455d-a295-01f57dfc4ef2
+		summarizeBy: none
+		sourceColumn: opportunity_date
+
+		variation Variation
+			isDefault
+			relationship: 95d4928a-d5b3-4e1c-9319-3785cf1ef1b6
+			defaultHierarchy: LocalDateTable_d328488e-91df-45df-8f77-78c5cd751b85.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column close_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 87608128-c4e7-4d1a-b23e-d274363433cb
+		summarizeBy: none
+		sourceColumn: close_date
+
+		variation Variation
+			isDefault
+			relationship: 6490938f-081b-4eab-aee5-3535ebdc2f21
+			defaultHierarchy: LocalDateTable_1ee42855-a996-43f6-b7f2-fb839ee5118d.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition 'Dim Opportunity' = m
+		mode: import
+		source =
+				let
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("fZJNTsMwEIWvYnVdS07SsKdVVahoiRrBpurCpSOwcGzLP7TiOhyFi+GJ+2MqxCbPb2SNv7yZ9Xrw2FDGisEwHvDEkpkkuQ1WW07u1S44bwW4WGu/vzRpeJAaTRM/U+XBGiscRNNY7Qy8eKFesYE0bzzqEvak5RIvlKy8oaygBTubkhb1YDM8wpQ5TJlgUMYyALnTVnxqhVXeGaG4O1EsxI4uuH0HH80KPCgv+otj8LwvKdhzmRPUGUHJLgRVTlAlApSl/uCk1TJgZ3x4EqzwYovtm9V1EtOD4colhlMOk5iOoy1ImT3NLhwVxnLmGOUco8SB8gzWw4HMrA4G/0xosgMy5wqExams5td55CzHPJ7MNUc2kerXROqco04cKG3oOuHJA9+6vq/Up/l4DGAx+385Zrzr/lyOivbbl8wI89lsfgA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [opportunity_sk = _t, opportunity_id = _t, customer_id = _t, customer_name = _t, city = _t, state = _t, segment = _t, opportunity_type = _t, brand = _t, origin = _t, opportunity_date = _t, close_date = _t]),
+				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(Origem, {{"opportunity_sk", type text}, {"opportunity_id", type text}, {"customer_id", type text}, {"customer_name", type text}, {"city", type text}, {"state", type text}, {"segment", type text}, {"opportunity_type", type text}, {"brand", type text}, {"origin", type text}, {"opportunity_date", type date}, {"close_date", type date}})
+				in
+				  #"Tipo de coluna alterado"
+
+	annotation PBI_ResultType = Table
+

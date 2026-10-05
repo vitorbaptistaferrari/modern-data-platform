@@ -1,0 +1,66 @@
+relationship 95d4928a-d5b3-4e1c-9319-3785cf1ef1b6
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'Dim Opportunity'.opportunity_date
+	toColumn: LocalDateTable_d328488e-91df-45df-8f77-78c5cd751b85.Date
+
+relationship 6490938f-081b-4eab-aee5-3535ebdc2f21
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'Dim Opportunity'.close_date
+	toColumn: LocalDateTable_1ee42855-a996-43f6-b7f2-fb839ee5118d.Date
+
+relationship cc413207-fe89-47f8-baa7-2577e06336b2
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'Dim Calendar'.date
+	toColumn: LocalDateTable_65beffcb-1d32-48f6-b865-8c3adb50d378.Date
+
+relationship c25a4ee1-d418-4abe-a679-1907b7ea9420
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'Dim Calendar'.month_year
+	toColumn: LocalDateTable_88649925-44bd-40c5-8cd9-9461cf0566d7.Date
+
+relationship 6077f30c-ce00-ec2b-4c1e-cf3a61740f06
+	fromColumn: 'Fact Revenue'.calendar_sk
+	toColumn: 'Dim Calendar'.calendar_sk
+
+relationship 8b1bc7c0-bc3d-3c77-4cdc-62168956b259
+	fromColumn: 'Fact Revenue'.brand_sk
+	toColumn: 'Dim Brand'.brand_sk
+
+relationship 98e6fd8c-2505-1f0b-c4fb-713c4dd07874
+	fromColumn: 'Fact Revenue'.user_sk
+	toColumn: 'Dim User'.user_sk
+
+relationship 9e6406e1-b94a-9b35-2d25-06ada1889560
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Fact Revenue'.opportunity_sk
+	toColumn: 'Dim Opportunity'.opportunity_sk
+
+relationship da484319-0f35-c19d-9f18-259b808c6199
+	fromColumn: 'Fact Revenue'.opportunity_stage_sk
+	toColumn: 'Dim Opportunity Stage'.opportunity_stage_sk
+
+relationship 8aad8fbb-0362-6295-66e2-9a2502b49414
+	fromColumn: 'Fact Revenue'.negotiation_type_sk
+	toColumn: 'Dim Negotiation Type'.negotiation_type_sk
+
+relationship 9e6d8b7c-22ab-b377-a863-f18be2d0c8c1
+	fromColumn: 'Fact Revenue'.revenue_hierarchy_sk
+	toColumn: 'Dim Revenue Hierarchy'.revenue_hierarchy_sk
+
+relationship fde4f4ec-862e-7329-e1b8-a2091700eedc
+	fromColumn: 'Fact Target'.brand_sk
+	toColumn: 'Dim Brand'.brand_sk
+
+relationship 0beeedd2-a44b-6309-a54a-554050c4bcd0
+	fromColumn: 'Fact Target'.target_type_sk
+	toColumn: 'Dim Target Type'.target_type_sk
+
+relationship bdecd4ea-be6e-8305-37e4-926ee478ddb6
+	fromColumn: 'Fact Target'.calendar_sk
+	toColumn: 'Dim Calendar'.calendar_sk
+
+relationship 577f2023-2b98-69cb-2dd8-e953f09aac29
+	fromColumn: 'Fact Target'.revenue_hierarchy_sk
+	toColumn: 'Dim Revenue Hierarchy'.revenue_hierarchy_sk
+
