@@ -18,12 +18,17 @@ The generator is designed to be:
 
 from dataclasses import dataclass
 from datetime import date, timedelta
+from pathlib import Path
 
 import random
 import string
 
 import pandas as pd
 
+
+# ----------------------------------------------------------------------
+# CONFIGURATION
+# ----------------------------------------------------------------------
 
 @dataclass
 class GeneratorConfig:
@@ -50,6 +55,13 @@ DEFAULT_CONFIG = GeneratorConfig(
     seed=42,
 )
 
+
+OUTPUT_DIR = Path("data/synthetic")
+
+
+# ----------------------------------------------------------------------
+# CUSTOMERS
+# ----------------------------------------------------------------------
 
 def generate_customers(
     config: GeneratorConfig,
@@ -145,13 +157,16 @@ def generate_customers(
         config.n_customers + 1,
     ):
         state = random.choice(states)
+
         city = random.choice(
             cities_by_state[state]
         )
 
         records.append(
             {
-                "customer_id": f"CUST-{i:06d}",
+                "customer_id": (
+                    f"CUST-{i:06d}"
+                ),
                 "customer_name": (
                     f"Customer {i:06d}"
                 ),
@@ -174,6 +189,10 @@ def generate_customers(
 
     return pd.DataFrame(records)
 
+
+# ----------------------------------------------------------------------
+# USERS
+# ----------------------------------------------------------------------
 
 def generate_users(
     config: GeneratorConfig,
@@ -224,11 +243,17 @@ def generate_users(
 
         records.append(
             {
-                "user_id": f"USER-{i:05d}",
-                "user_name": f"User {i:05d}",
+                "user_id": (
+                    f"USER-{i:05d}"
+                ),
+                "user_name": (
+                    f"User {i:05d}"
+                ),
                 "department": department,
                 "role": random.choice(
-                    roles_by_department[department]
+                    roles_by_department[
+                        department
+                    ]
                 ),
                 "active": random.choice(
                     [True, True, True, False]
@@ -239,6 +264,10 @@ def generate_users(
     return pd.DataFrame(records)
 
 
+# ----------------------------------------------------------------------
+# RECORD TYPES
+# ----------------------------------------------------------------------
+
 def generate_record_types() -> pd.DataFrame:
     """
     Generate synthetic opportunity record types.
@@ -247,20 +276,30 @@ def generate_record_types() -> pd.DataFrame:
     records = [
         {
             "record_type_id": "RT-001",
-            "record_type_name": "New Business",
+            "record_type_name": (
+                "New Business"
+            ),
         },
         {
             "record_type_id": "RT-002",
-            "record_type_name": "Existing Business",
+            "record_type_name": (
+                "Existing Business"
+            ),
         },
         {
             "record_type_id": "RT-003",
-            "record_type_name": "Strategic Account",
+            "record_type_name": (
+                "Strategic Account"
+            ),
         },
     ]
 
     return pd.DataFrame(records)
 
+
+# ----------------------------------------------------------------------
+# OPPORTUNITY STAGES
+# ----------------------------------------------------------------------
 
 def generate_opportunity_stages() -> pd.DataFrame:
     """
@@ -308,6 +347,10 @@ def generate_opportunity_stages() -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
+# ----------------------------------------------------------------------
+# OPPORTUNITIES
+# ----------------------------------------------------------------------
+
 def generate_opportunities(
     config: GeneratorConfig,
     customers: pd.DataFrame,
@@ -350,7 +393,9 @@ def generate_opportunities(
     )
 
     record_type_ids = (
-        record_types["record_type_id"].tolist()
+        record_types[
+            "record_type_id"
+        ].tolist()
     )
 
     stage_ids = (
@@ -423,7 +468,9 @@ def generate_opportunities(
                 "opportunity_id": (
                     f"OPP-{i:07d}"
                 ),
-                "customer_id": customer_id,
+                "customer_id": (
+                    customer_id
+                ),
                 "user_id": user_id,
                 "record_type_id": (
                     record_type_id
@@ -449,6 +496,10 @@ def generate_opportunities(
     return pd.DataFrame(records)
 
 
+# ----------------------------------------------------------------------
+# CONTRACTS
+# ----------------------------------------------------------------------
+
 def generate_contracts(
     config: GeneratorConfig,
     opportunities: pd.DataFrame,
@@ -469,6 +520,7 @@ def generate_contracts(
     records = []
 
     for i, opportunity in opportunities.iterrows():
+
         if random.random() > 0.65:
             continue
 
@@ -504,8 +556,10 @@ def generate_contracts(
                         "opportunity_id"
                     ]
                 ),
-                "contract_status": random.choice(
-                    contract_statuses
+                "contract_status": (
+                    random.choice(
+                        contract_statuses
+                    )
                 ),
                 "contract_start_date": (
                     start_date
@@ -526,6 +580,10 @@ def generate_contracts(
 
     return pd.DataFrame(records)
 
+
+# ----------------------------------------------------------------------
+# QUOTES
+# ----------------------------------------------------------------------
 
 def generate_quotes(
     config: GeneratorConfig,
@@ -548,9 +606,14 @@ def generate_quotes(
     records = []
 
     for i, opportunity in opportunities.iterrows():
+
         n_quotes = random.choices(
             [0, 1, 2],
-            weights=[0.20, 0.65, 0.15],
+            weights=[
+                0.20,
+                0.65,
+                0.15,
+            ],
             k=1,
         )[0]
 
@@ -598,10 +661,14 @@ def generate_quotes(
                             "opportunity_id"
                         ]
                     ),
-                    "quote_status": random.choice(
-                        quote_statuses
+                    "quote_status": (
+                        random.choice(
+                            quote_statuses
+                        )
                     ),
-                    "quote_date": quote_date,
+                    "quote_date": (
+                        quote_date
+                    ),
                     "quoted_amount": (
                         quoted_amount
                     ),
@@ -611,18 +678,18 @@ def generate_quotes(
     return pd.DataFrame(records)
 
 
+# ----------------------------------------------------------------------
+# TARGETS
+# ----------------------------------------------------------------------
+
 def generate_targets(
     config: GeneratorConfig,
 ) -> pd.DataFrame:
     """
     Generate synthetic business targets.
 
-    Targets are generated by reporting period, brand,
-    target type and record nature.
-
-    The generation is independent from the number of
-    opportunities and customers, reflecting the fact that
-    targets originate from a separate business source.
+    Targets are generated by reporting period,
+    brand, target type and record nature.
     """
 
     random.seed(config.seed + 5)
@@ -639,11 +706,6 @@ def generate_targets(
         "Expansion",
     ]
 
-    natures = [
-        "Monthly Target",
-        "Annual Target",
-    ]
-
     periods = pd.date_range(
         start=config.start_date,
         end=config.end_date,
@@ -655,10 +717,12 @@ def generate_targets(
     target_id = 1
 
     for period in periods:
+
         for brand in brands:
+
             for target_type in target_types:
 
-                monthly_value = round(
+                target_value = round(
                     random.uniform(
                         50000,
                         500000,
@@ -671,7 +735,9 @@ def generate_targets(
                         "target_id": (
                             f"TGT-{target_id:07d}"
                         ),
-                        "period": period.date(),
+                        "period": (
+                            period.date()
+                        ),
                         "brand": brand,
                         "target_type": (
                             target_type
@@ -680,7 +746,7 @@ def generate_targets(
                             "Monthly Target"
                         ),
                         "target_value": (
-                            monthly_value
+                            target_value
                         ),
                     }
                 )
@@ -690,7 +756,51 @@ def generate_targets(
     return pd.DataFrame(records)
 
 
+# ----------------------------------------------------------------------
+# PERSISTENCE
+# ----------------------------------------------------------------------
+
+def save_dataset(
+    df: pd.DataFrame,
+    dataset_name: str,
+) -> Path:
+    """
+    Save a generated dataset as Parquet.
+    """
+
+    OUTPUT_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    output_path = (
+        OUTPUT_DIR
+        / f"{dataset_name}.parquet"
+    )
+
+    df.to_parquet(
+        output_path,
+        index=False,
+    )
+
+    print(
+        f"Saved {dataset_name}: "
+        f"{len(df)} records"
+    )
+
+    print(
+        f"Path: {output_path}"
+    )
+
+    return output_path
+
+
+# ----------------------------------------------------------------------
+# MAIN
+# ----------------------------------------------------------------------
+
 if __name__ == "__main__":
+
     config = DEFAULT_CONFIG
 
     print("Synthetic Data Generator")
@@ -722,42 +832,24 @@ if __name__ == "__main__":
         f"{config.seed}"
     )
 
+    # --------------------------------------------------------------
+    # Generate source datasets
+    # --------------------------------------------------------------
+
     record_types = (
         generate_record_types()
     )
-
-    print("\nGenerated record types:")
-    print(record_types)
 
     stages = (
         generate_opportunity_stages()
     )
 
-    print("\nGenerated opportunity stages:")
-    print(stages)
-
     customers = generate_customers(
         config
     )
 
-    print("\nGenerated customers:")
-    print(customers.head())
-
-    print(
-        f"\nTotal customers: "
-        f"{len(customers)}"
-    )
-
     users = generate_users(
         config
-    )
-
-    print("\nGenerated users:")
-    print(users.head())
-
-    print(
-        f"\nTotal users: "
-        f"{len(users)}"
     )
 
     opportunities = generate_opportunities(
@@ -768,25 +860,9 @@ if __name__ == "__main__":
         stages,
     )
 
-    print("\nGenerated opportunities:")
-    print(opportunities.head())
-
-    print(
-        f"\nTotal opportunities: "
-        f"{len(opportunities)}"
-    )
-
     contracts = generate_contracts(
         config,
         opportunities,
-    )
-
-    print("\nGenerated contracts:")
-    print(contracts.head())
-
-    print(
-        f"\nTotal contracts: "
-        f"{len(contracts)}"
     )
 
     quotes = generate_quotes(
@@ -794,22 +870,54 @@ if __name__ == "__main__":
         opportunities,
     )
 
-    print("\nGenerated quotes:")
-    print(quotes.head())
-
-    print(
-        f"\nTotal quotes: "
-        f"{len(quotes)}"
-    )
-
     targets = generate_targets(
         config
     )
 
-    print("\nGenerated targets:")
-    print(targets.head())
+    # --------------------------------------------------------------
+    # Persist source datasets
+    # --------------------------------------------------------------
+
+    save_dataset(
+        customers,
+        "customers",
+    )
+
+    save_dataset(
+        users,
+        "users",
+    )
+
+    save_dataset(
+        record_types,
+        "record_types",
+    )
+
+    save_dataset(
+        stages,
+        "opportunity_stages",
+    )
+
+    save_dataset(
+        opportunities,
+        "opportunities",
+    )
+
+    save_dataset(
+        contracts,
+        "contracts",
+    )
+
+    save_dataset(
+        quotes,
+        "quotes",
+    )
+
+    save_dataset(
+        targets,
+        "targets",
+    )
 
     print(
-        f"\nTotal targets: "
-        f"{len(targets)}"
+        "\nSynthetic data generation completed."
     )
