@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "ModernDataPlatform"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "c9049f62-d5b1-4adf-a481-f0d5d7efb25c"
+  }
+}
