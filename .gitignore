@@ -218,3 +218,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Power BI Project local files
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
