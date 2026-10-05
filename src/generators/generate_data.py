@@ -19,6 +19,11 @@ The generator is designed to be:
 from dataclasses import dataclass
 from datetime import date
 
+import random
+import string
+
+import pandas as pd
+
 
 @dataclass
 class GeneratorConfig:
@@ -35,6 +40,7 @@ class GeneratorConfig:
 
     seed: int = 42
 
+
 DEFAULT_CONFIG = GeneratorConfig(
     start_date=date(2025, 1, 1),
     end_date=date(2027, 12, 31),
@@ -43,22 +49,6 @@ DEFAULT_CONFIG = GeneratorConfig(
     n_opportunities=5000,
     seed=42,
 )
-
-if __name__ == "__main__":
-    config = DEFAULT_CONFIG
-
-    print("Synthetic Data Generator")
-    print("------------------------")
-    print(f"Period: {config.start_date} → {config.end_date}")
-    print(f"Customers: {config.n_customers}")
-    print(f"Users: {config.n_users}")
-    print(f"Opportunities: {config.n_opportunities}")
-    print(f"Seed: {config.seed}")
-
-import random
-import string
-
-import pandas as pd
 
 
 def generate_customers(config: GeneratorConfig) -> pd.DataFrame:
@@ -85,16 +75,57 @@ def generate_customers(config: GeneratorConfig) -> pd.DataFrame:
     ]
 
     cities_by_state = {
-        "SP": ["São Paulo", "Campinas", "Santos", "Sorocaba"],
-        "RJ": ["Rio de Janeiro", "Niterói", "Petrópolis"],
-        "MG": ["Belo Horizonte", "Uberlândia", "Juiz de Fora"],
-        "PR": ["Curitiba", "Londrina", "Maringá"],
-        "SC": ["Florianópolis", "Joinville", "Blumenau"],
-        "RS": ["Porto Alegre", "Caxias do Sul", "Pelotas"],
-        "BA": ["Salvador", "Feira de Santana", "Vitória da Conquista"],
-        "PE": ["Recife", "Olinda", "Caruaru"],
-        "GO": ["Goiânia", "Anápolis", "Aparecida de Goiânia"],
-        "ES": ["Vitória", "Vila Velha", "Serra"],
+        "SP": [
+            "São Paulo",
+            "Campinas",
+            "Santos",
+            "Sorocaba",
+        ],
+        "RJ": [
+            "Rio de Janeiro",
+            "Niterói",
+            "Petrópolis",
+        ],
+        "MG": [
+            "Belo Horizonte",
+            "Uberlândia",
+            "Juiz de Fora",
+        ],
+        "PR": [
+            "Curitiba",
+            "Londrina",
+            "Maringá",
+        ],
+        "SC": [
+            "Florianópolis",
+            "Joinville",
+            "Blumenau",
+        ],
+        "RS": [
+            "Porto Alegre",
+            "Caxias do Sul",
+            "Pelotas",
+        ],
+        "BA": [
+            "Salvador",
+            "Feira de Santana",
+            "Vitória da Conquista",
+        ],
+        "PE": [
+            "Recife",
+            "Olinda",
+            "Caruaru",
+        ],
+        "GO": [
+            "Goiânia",
+            "Anápolis",
+            "Aparecida de Goiânia",
+        ],
+        "ES": [
+            "Vitória",
+            "Vila Velha",
+            "Serra",
+        ],
     }
 
     customer_segments = [
@@ -126,34 +157,120 @@ def generate_customers(config: GeneratorConfig) -> pd.DataFrame:
                 ),
                 "city": city,
                 "state": state,
-                "segment": random.choice(customer_segments),
-                "status": random.choice(customer_status),
+                "segment": random.choice(
+                    customer_segments
+                ),
+                "status": random.choice(
+                    customer_status
+                ),
             }
         )
 
     return pd.DataFrame(records)
 
-    customers = generate_customers(config)
 
-    print("\nGenerated customers:")
-    print(customers.head())
+def generate_users(config: GeneratorConfig) -> pd.DataFrame:
+    """
+    Generate synthetic users representing commercial and
+    operational responsibilities.
+    """
 
-    print(f"\nTotal customers: {len(customers)}")
+    random.seed(config.seed + 1)
+
+    departments = [
+        "Commercial",
+        "Customer Success",
+        "Operations",
+        "Management",
+    ]
+
+    roles_by_department = {
+        "Commercial": [
+            "Sales Representative",
+            "Account Executive",
+            "Sales Manager",
+        ],
+        "Customer Success": [
+            "Customer Success Analyst",
+            "Customer Success Manager",
+        ],
+        "Operations": [
+            "Operations Analyst",
+            "Operations Manager",
+        ],
+        "Management": [
+            "Manager",
+            "Director",
+        ],
+    }
+
+    records = []
+
+    for i in range(1, config.n_users + 1):
+        department = random.choice(
+            departments
+        )
+
+        records.append(
+            {
+                "user_id": f"USER-{i:05d}",
+                "user_name": f"User {i:05d}",
+                "department": department,
+                "role": random.choice(
+                    roles_by_department[department]
+                ),
+                "active": random.choice(
+                    [True, True, True, False]
+                ),
+            }
+        )
+
+    return pd.DataFrame(records)
+
 
 if __name__ == "__main__":
     config = DEFAULT_CONFIG
 
     print("Synthetic Data Generator")
     print("------------------------")
-    print(f"Period: {config.start_date} → {config.end_date}")
-    print(f"Customers: {config.n_customers}")
-    print(f"Users: {config.n_users}")
-    print(f"Opportunities: {config.n_opportunities}")
-    print(f"Seed: {config.seed}")
+    print(
+        f"Period: "
+        f"{config.start_date} → "
+        f"{config.end_date}"
+    )
+    print(
+        f"Customers: "
+        f"{config.n_customers}"
+    )
+    print(
+        f"Users: "
+        f"{config.n_users}"
+    )
+    print(
+        f"Opportunities: "
+        f"{config.n_opportunities}"
+    )
+    print(
+        f"Seed: "
+        f"{config.seed}"
+    )
 
     customers = generate_customers(config)
 
     print("\nGenerated customers:")
     print(customers.head())
 
-    print(f"\nTotal customers: {len(customers)}")
+    print(
+        f"\nTotal customers: "
+        f"{len(customers)}"
+    )
+
+    users = generate_users(config)
+
+    print("\nGenerated users:")
+    print(users.head())
+
+    print(
+        f"\nTotal users: "
+        f"{len(users)}"
+    )
