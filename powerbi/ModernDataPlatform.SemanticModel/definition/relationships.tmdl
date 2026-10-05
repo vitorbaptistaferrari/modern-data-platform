@@ -31,8 +31,6 @@ relationship 98e6fd8c-2505-1f0b-c4fb-713c4dd07874
 	toColumn: 'Dim User'.user_sk
 
 relationship 9e6406e1-b94a-9b35-2d25-06ada1889560
-	crossFilteringBehavior: bothDirections
-	fromCardinality: one
 	fromColumn: 'Fact Revenue'.opportunity_sk
 	toColumn: 'Dim Opportunity'.opportunity_sk
 
