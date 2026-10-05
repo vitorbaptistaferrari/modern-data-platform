@@ -47,10 +47,23 @@ table Medidas
 
 	measure 'Revenue LY' =
 			
-			CALCULATE (
-			    [Revenue],
-			    SAMEPERIODLASTYEAR ( 'Dim Calendar'[date] )
-			)
+			VAR CurrentDates =
+			    VALUES('Dim Calendar'[date])
+			VAR PreviousYearDates =
+			    SELECTCOLUMNS(
+			        CurrentDates,
+			        "PreviousYearDate",
+			        EDATE('Dim Calendar'[date], -12)
+			    )
+			RETURN
+			    CALCULATE(
+			        [Revenue],
+			        REMOVEFILTERS('Dim Calendar'),
+			        TREATAS(
+			            PreviousYearDates,
+			            'Dim Calendar'[date]
+			        )
+			    )
 		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 2bfe358a-e19f-41e2-8339-bb569403371b
 
@@ -58,10 +71,23 @@ table Medidas
 
 	measure 'Revenue LY YTD' =
 			
-			CALCULATE (
-			    [Revenue YTD],
-			    SAMEPERIODLASTYEAR ( 'Dim Calendar'[date] )
-			)
+			VAR CurrentDates =
+			    VALUES('Dim Calendar'[date])
+			VAR PreviousYearDates =
+			    SELECTCOLUMNS(
+			        CurrentDates,
+			        "PreviousYearDate",
+			        EDATE('Dim Calendar'[date], -12)
+			    )
+			RETURN
+			    CALCULATE(
+			        [Revenue],
+			        REMOVEFILTERS('Dim Calendar'),
+			        TREATAS(
+			            PreviousYearDates,
+			            'Dim Calendar'[date]
+			        )
+			    )
 		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 17ecff4b-26c6-447c-bc96-4af0224575d8
 

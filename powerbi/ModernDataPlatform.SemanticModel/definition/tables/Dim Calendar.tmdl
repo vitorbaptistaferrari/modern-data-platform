@@ -48,6 +48,9 @@ table 'Dim Calendar'
 		lineageTag: ade12b3a-b323-4bc8-96c8-6319d8d5944c
 		summarizeBy: none
 		sourceColumn: month_name
+		sortByColumn: month
+
+		changedProperty = SortByColumn
 
 		annotation SummarizationSetBy = Automatic
 
@@ -79,7 +82,7 @@ table 'Dim Calendar'
 		mode: import
 		source =
 				let
-				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45Wcnb00TUyMDLTNTAEIiUdJQwOkAIxvRLzShOLKhEqgKxAQ6VYHWQzjJDNMEIxwwiI3VKTilAMMcJmiDGyIcYohhgDsW9iUXIGQh6bCSbIJpigmGACxI4FRZk5CHmQCUZKsbEA", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [calendar_sk = _t, date = _t, year = _t, month = _t, month_name = _t, month_year = _t, quarter = _t]),
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("bZLBasMwEET/xecEEtka28dQ6KGkh9BjyMEpoi2kIajxIX9fKRfNWAterLF2H7J4x2Pzstuv3cb59WabnmbVVCG98vJtus5TfJSOtDpsm9OKGY4ZThgu1Ws4R4E4C9IypBVIm+p9ip/fZd8idEzohNCl2t3iz6XsZ4JbEDwTvBD88wzlH7w1D56HzCNf5nwNZdsC9AzoBdA/AZdygvzh0C4AAwMGAQz5Duav+e9eGizEyIhREGOqj3C7h99ziKWnooBV0mB5BcsrsEoaTK9geQVWSUPtFSyvwCppqL2C5RVYJQ1Lr2B5BVZJQ+UVLK/AKmmovILlFVglDYZXsLwCq6TB9grFq9M/", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [calendar_sk = _t, date = _t, year = _t, month = _t, month_name = _t, month_year = _t, quarter = _t]),
 				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(Origem, {{"calendar_sk", type text}, {"date", type date}, {"year", Int64.Type}, {"month", Int64.Type}, {"month_name", type text}, {"month_year", type date}, {"quarter", type text}})
 				in
 				  #"Tipo de coluna alterado"

@@ -66,7 +66,7 @@ table 'Fact Target'
 		mode: import
 		source =
 				let
-				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WCnEM0jUwMFTSUXJ29NE1MjAy0zUw1AULOMFkQkKgjCAPmEhiUXpqCZBhaGQABEqxOjCTjFBMMiLBJGM0k4xxmmQEM8kIZpIRskmWaAaZoBhkjM1JxjCDjFGcZIBmkimKSSZIJhkTCiZTsEmxAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [target_fact_sk = _t, calendar_sk = _t, brand_sk = _t, target_type_sk = _t, revenue_hierarchy_sk = _t, nature = _t, target_value = _t]),
+				  Origem = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("ndU7awNBDATg/3K1D1aPvUfppEmRyrgzLlKE9CH/n4TgBUtmUCadOcPHzK5YXS7T+XiaW5PpMD0fX2dt2ucm8++Hp/HP+Xz7cXoZX94+P96/fn7svbU2XQ8DUgjpgHRAeg9tLUIGIRuQDcgClBJ5gPTv1aSlSB1KVbcUaYFQ0W1PidYAGdMtRdqgVHTLkXYIVd1iImkBcqKbxEgiUOK6iUKo6JZHSeJ09/9fnDiUqnIJ6hAqyyUpjvfC3FySVigV5R4OfINS1S5PUxzwlWinUdIGpbJdPCcVKJXtkhRHfGPaJcmgVLVLJ64OpapdPvE44zvRzpK0QKlsl85phVLZLkl3M75QS/zhnHYocY+KNQiRL6ZJkJg1nq7OFErcOjCDEPlimgeJ2eNpBqxDiby5BULkg2lrkJhFbinTBiVyHdgOJfLB9DjhzCb3mMkFSuQ6cIUS+WB6HHFmlXvK5FAi14F3KJEPpscZZ1Z5T5lWKJHrwDcoVe3SO+dxxplV3mOm3qBUtUvz1AVKZbuUKc44s8qXlMmgVLZLmRxKVbvbW3D9Bg==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [target_fact_sk = _t, calendar_sk = _t, brand_sk = _t, target_type_sk = _t, revenue_hierarchy_sk = _t, nature = _t, target_value = _t]),
 				  #"Tipo de coluna alterado" = Table.TransformColumnTypes(Origem, {{"target_fact_sk", type text}, {"calendar_sk", type text}, {"brand_sk", type text}, {"target_type_sk", type text}, {"revenue_hierarchy_sk", type text}, {"nature", type text}, {"target_value", Int64.Type}})
 				in
 				  #"Tipo de coluna alterado"
