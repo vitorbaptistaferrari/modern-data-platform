@@ -1,84 +1,72 @@
 # Power BI Semantic Model
 
-This directory contains the Power BI implementation of the analytical semantic model for the Modern Data Platform project.
+This directory contains the Power BI Semantic Model for the `modern-data-platform` project.
 
-The semantic model represents the analytical layer of an end-to-end data engineering solution based on Medallion Architecture.
+The semantic model represents the analytical layer of the project and is designed according to the dimensional structures and business concepts defined in the Gold layer.
 
 ## Purpose
 
-The Power BI implementation demonstrates how the analytical outputs of the data platform are structured for business intelligence and analytics.
+The model provides a structured analytical foundation for revenue and target analysis, including:
 
-The model follows a dimensional architecture with separate fact and dimension tables, shared dimensions, explicit relationships and reusable DAX measures.
+- Revenue analysis
+- Target analysis
+- Achievement analysis
+- Year-to-date calculations
+- Year-over-year comparisons
+- Revenue variance analysis
+- Revenue hierarchy analysis
 
-The public implementation is designed for portfolio and technical demonstration purposes.
+The model is implemented using a dimensional architecture with shared dimensions and analytical fact tables.
 
-## Data Privacy
+## Public Reproducibility
 
-No proprietary, production or confidential data is included in this repository.
+The Power BI project uses a controlled synthetic dataset embedded directly in the semantic model.
 
-The Power BI model uses synthetic data created exclusively to demonstrate the analytical structure, dimensional relationships and business calculations of the project.
+This approach is intentional.
 
-The public implementation therefore represents the analytical architecture and business concepts of the solution without exposing production information.
+The public repository does not connect to production systems, proprietary databases or internal company infrastructure. Instead, the Power BI model uses synthetic analytical data designed to reproduce the relevant business structures and demonstrate the analytical capabilities of the project.
 
-## Power BI Project
+The synthetic dataset is aligned with the concepts and structures defined in the Gold layer, allowing the semantic model to remain functionally representative without exposing production data.
 
-The Power BI project is stored using the Power BI Project (`.pbip`) format.
+This makes the project reproducible and self-contained for portfolio demonstration purposes.
 
-Main project:
+## Model Architecture
 
-- `ModernDataPlatform.pbip`
+The semantic model follows a star-schema design.
 
-Associated project directories:
+### Fact Tables
 
-- `ModernDataPlatform.Report/`
-- `ModernDataPlatform.SemanticModel/`
+#### Fact Revenue
 
-Using the Power BI Project format allows the report and semantic model artifacts to be versioned together with the rest of the repository.
+Contains analytical revenue occurrences.
 
-## Semantic Model
+The table is designed around the following concepts:
 
-The model follows a star-schema-oriented structure.
+- Revenue occurrence
+- Opportunity
+- User
+- Brand
+- Calendar
+- Opportunity stage
+- Negotiation type
+- Revenue hierarchy
 
-### Fact tables
+#### Fact Target
 
-- `Fact Revenue`
-- `Fact Target`
+Contains analytical target values.
 
-### Dimension tables
+The table is designed around:
 
-- `Dim Calendar`
-- `Dim Brand`
-- `Dim User`
-- `Dim Opportunity`
-- `Dim Opportunity Stage`
-- `Dim Negotiation Type`
-- `Dim Target Type`
-- `Dim Revenue Hierarchy`
+- Period
+- Brand
+- Target type
+- Revenue hierarchy
+- Target nature
+- Target value
 
-### Measures
+## Dimensions
 
-The model contains reusable analytical measures for revenue, targets, achievement, time intelligence and variance analysis.
-
-Core measures include:
-
-- `Revenue`
-- `Target`
-- `Achievement %`
-- `Revenue YTD`
-- `Target YTD`
-- `Revenue LY`
-- `Revenue LY YTD`
-- `Revenue YoY`
-- `Revenue YoY YTD`
-- `Revenue Variance`
-- `Revenue Target Variance YTD`
-- `Achievement YTD`
-
-## Relationships
-
-The semantic model uses one-to-many relationships from dimensions to fact tables.
-
-Fact Revenue is related to:
+The model contains the following dimensions:
 
 - Dim Calendar
 - Dim Brand
@@ -86,76 +74,105 @@ Fact Revenue is related to:
 - Dim Opportunity
 - Dim Opportunity Stage
 - Dim Negotiation Type
-- Dim Revenue Hierarchy
-
-Fact Target is related to:
-
-- Dim Calendar
-- Dim Brand
 - Dim Target Type
 - Dim Revenue Hierarchy
 
-The model avoids direct fact-to-fact relationships and unnecessary dimension-to-dimension relationships.
+Shared dimensions such as Calendar, Brand and Revenue Hierarchy support analysis across the fact tables.
+
+## Relationships
+
+The model follows a dimensional relationship pattern:
+
+- Dimensions → Fact Revenue
+- Dimensions → Fact Target
+
+There are no direct fact-to-fact relationships.
+
+The model is designed to keep analytical filtering primarily driven by dimensions.
 
 ## Revenue Hierarchy
 
-The revenue hierarchy is represented as:
+Revenue is organized into analytical categories representing the business concepts defined in the Gold layer.
 
-    Revenue
-    ├── Prospecting
-    │   └── Prospecting
-    ├── Renewal
-    │   └── Renewal
-    └── Expansion
-        ├── Expansion
-        ├── Cross-Sell
-        └── Up-Sell
+The hierarchy includes:
 
-This hierarchy allows revenue analysis at different business levels while maintaining a consistent analytical structure.
+- Prospecting
+- Renewal
+- Expansion
+- Cross-Sell
+- Up-Sell
+
+This structure allows revenue to be analyzed both at the broader negotiation level and at more specific revenue categories.
+
+## DAX Measures
+
+The semantic model includes reusable DAX measures for analytical calculations.
+
+Current measures include:
+
+- Revenue
+- Target
+- Achievement %
+- Revenue YTD
+- Target YTD
+- Revenue LY
+- Revenue LY YTD
+- Revenue YoY
+- Revenue YoY YTD
+- Revenue Variance
+- Revenue Target Variance YTD
+- Achievement YTD
+
+The measures are documented separately in the `powerbi/` directory.
 
 ## Time Intelligence
 
-Time intelligence is based on `Dim Calendar`.
+Time intelligence is based on the dedicated `Dim Calendar` table.
 
-The model includes:
+The model includes calculations for:
 
 - Year-to-date revenue
-- Year-to-date target
+- Year-to-date targets
 - Previous-year revenue
 - Previous-year year-to-date revenue
 - Year-over-year variation
-- Year-to-date year-over-year variation
 
-The calendar is treated as a shared analytical dimension rather than being duplicated across fact tables.
+The calendar dimension provides the primary time context for analytical calculations.
+
+## Project Structure
+
+The Power BI project is stored using the Power BI Project (`.pbip`) format.
+
+The directory contains:
+
+- Power BI report definition
+- Semantic model definition
+- Model tables
+- Relationships
+- Measures
+- Model metadata
+
+The project files are versioned together with the data engineering code and documentation.
 
 ## Design Principles
 
 The semantic model follows these principles:
 
-1. Separate facts and dimensions.
-2. Reuse shared dimensions across analytical processes.
-3. Keep business measures reusable and independent from individual report visuals.
-4. Avoid direct relationships between fact tables.
-5. Centralize time intelligence in a shared calendar dimension.
-6. Keep production and proprietary data outside the public repository.
-7. Use synthetic data exclusively for public demonstration.
-8. Keep the semantic model aligned with the Gold analytical layer.
-
-## Public Portfolio Scope
-
-This repository is a public technical representation of the solution architecture.
-
-It focuses on demonstrating:
-
-- Data Engineering architecture
-- Medallion Architecture
 - Dimensional modeling
-- Analytical data structures
-- Microsoft Fabric-oriented design
-- Power BI Semantic Modeling
-- DAX measures
-- Data quality concepts
-- Business-rule isolation
-- Data and analytics integration
+- Reusable measures
+- Shared dimensions
+- Explicit business concepts
+- Separation between analytical modeling and presentation
+- Reproducibility
+- Synthetic data for public demonstration
+- No dependency on production data
 
-Production-specific implementation details, proprietary identifiers, confidential data and internal infrastructure are intentionally excluded.
+## Public Scope
+
+This repository is a public portfolio project.
+
+Production data, proprietary business information, credentials, internal identifiers and company-specific infrastructure are intentionally excluded.
+
+The objective is to demonstrate the engineering and analytical architecture, implementation patterns and technical reasoning involved in building a modern data platform.
+
+The project therefore prioritizes reproducibility and architectural transparency over reproducing any specific production environment.
