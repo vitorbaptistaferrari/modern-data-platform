@@ -455,6 +455,176 @@ def generate_opportunities(
     return pd.DataFrame(records)
 
 
+def generate_contracts(
+    config: GeneratorConfig,
+    opportunities: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Generate synthetic contract records.
+
+    Contracts are associated with opportunities and represent
+    the contractual stage of the revenue lifecycle.
+    """
+
+    random.seed(config.seed + 3)
+
+    contract_statuses = [
+        "Draft",
+        "Active",
+        "Expired",
+        "Cancelled",
+    ]
+
+    records = []
+
+    for i, opportunity in opportunities.iterrows():
+        # Not every opportunity necessarily results in a contract.
+        if random.random() > 0.65:
+            continue
+
+        start_date = opportunity[
+            "close_date"
+        ]
+
+        duration_days = random.choice(
+            [
+                180,
+                365,
+                730,
+            ]
+        )
+
+        end_date = (
+            start_date
+            + timedelta(
+                days=duration_days
+            )
+        )
+
+        if end_date > config.end_date:
+            end_date = config.end_date
+
+        records.append(
+            {
+                "contract_id": (
+                    f"CON-{i + 1:07d}"
+                ),
+                "opportunity_id": (
+                    opportunity[
+                        "opportunity_id"
+                    ]
+                ),
+                "contract_status": random.choice(
+                    contract_statuses
+                ),
+                "contract_start_date": (
+                    start_date
+                ),
+                "contract_end_date": (
+                    end_date
+                ),
+                "contract_value": round(
+                    opportunity["amount"]
+                    * random.uniform(
+                        0.90,
+                        1.10,
+                    ),
+                    2,
+                ),
+            }
+        )
+
+    return pd.DataFrame(records)
+
+
+def generate_quotes(
+    config: GeneratorConfig,
+    opportunities: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Generate synthetic quote records.
+
+    Quotes are associated with opportunities and represent
+    commercial proposals generated during the sales lifecycle.
+    """
+
+    random.seed(config.seed + 4)
+
+    quote_statuses = [
+        "Draft",
+        "Presented",
+        "Accepted",
+        "Rejected",
+        "Expired",
+    ]
+
+    records = []
+
+    for i, opportunity in opportunities.iterrows():
+        # An opportunity may have zero or more commercial quotes.
+        n_quotes = random.choices(
+            [0, 1, 2],
+            weights=[0.20, 0.65, 0.15],
+            k=1,
+        )[0]
+
+        for quote_number in range(
+            1,
+            n_quotes + 1,
+        ):
+            quote_date = (
+                opportunity[
+                    "opportunity_date"
+                ]
+                + timedelta(
+                    days=random.randint(
+                        1,
+                        60,
+                    )
+                )
+            )
+
+            if quote_date > opportunity[
+                "close_date"
+            ]:
+                quote_date = opportunity[
+                    "close_date"
+                ]
+
+            quoted_amount = round(
+                opportunity["amount"]
+                * random.uniform(
+                    0.90,
+                    1.15,
+                ),
+                2,
+            )
+
+            records.append(
+                {
+                    "quote_id": (
+                        f"QUO-"
+                        f"{i + 1:07d}-"
+                        f"{quote_number}"
+                    ),
+                    "opportunity_id": (
+                        opportunity[
+                            "opportunity_id"
+                        ]
+                    ),
+                    "quote_status": random.choice(
+                        quote_statuses
+                    ),
+                    "quote_date": quote_date,
+                    "quoted_amount": (
+                        quoted_amount
+                    ),
+                }
+            )
+
+    return pd.DataFrame(records)
+
+
 if __name__ == "__main__":
     config = DEFAULT_CONFIG
 
@@ -539,4 +709,30 @@ if __name__ == "__main__":
     print(
         f"\nTotal opportunities: "
         f"{len(opportunities)}"
+    )
+
+    contracts = generate_contracts(
+        config,
+        opportunities,
+    )
+
+    print("\nGenerated contracts:")
+    print(contracts.head())
+
+    print(
+        f"\nTotal contracts: "
+        f"{len(contracts)}"
+    )
+
+    quotes = generate_quotes(
+        config,
+        opportunities,
+    )
+
+    print("\nGenerated quotes:")
+    print(quotes.head())
+
+    print(
+        f"\nTotal quotes: "
+        f"{len(quotes)}"
     )
