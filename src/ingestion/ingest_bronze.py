@@ -2,17 +2,16 @@
 Bronze Layer Ingestion
 ======================
 
-Implements a simple ingestion pattern representing
+Implements a reusable ingestion pattern representing
 a Copy Job from operational sources into the Bronze layer.
 
-The ingestion process intentionally performs only
-technical operations:
+The ingestion process performs technical operations only:
 
 - Read source data
-- Validate the expected structure
+- Validate the source
 - Add ingestion metadata
 - Persist the data
-- Avoid business transformations
+- Use Full Load with Overwrite
 
 Business rules and analytical transformations belong
 to the Silver and Gold layers.
@@ -33,8 +32,20 @@ SOURCE_DIR = Path("data/synthetic")
 BRONZE_DIR = Path("data/bronze")
 
 
+DATASETS = [
+    "customers",
+    "users",
+    "record_types",
+    "opportunity_stages",
+    "opportunities",
+    "contracts",
+    "quotes",
+    "targets",
+]
+
+
 # ----------------------------------------------------------------------
-# INGESTION FUNCTION
+# INGESTION
 # ----------------------------------------------------------------------
 
 def ingest_to_bronze(
@@ -42,13 +53,10 @@ def ingest_to_bronze(
     bronze_path: Path,
 ) -> pd.DataFrame:
     """
-    Ingest a synthetic source dataset into the Bronze layer.
+    Ingest a single dataset into the Bronze layer.
 
-    The function simulates a Copy Job pattern by reading
-    the selected source dataset and persisting it into
-    the Bronze layer.
-
-    The process uses Full Load with Overwrite.
+    The process represents a Copy Job pattern using
+    Full Load with Overwrite.
     """
 
     if not source_path.exists():
@@ -69,7 +77,9 @@ def ingest_to_bronze(
 
     df = df.copy()
 
-    df["dt_ingestao"] = ingestion_timestamp
+    df["dt_ingestao"] = (
+        ingestion_timestamp
+    )
 
     bronze_path.parent.mkdir(
         parents=True,
@@ -82,7 +92,7 @@ def ingest_to_bronze(
     )
 
     print(
-        f"Ingested: {source_path.name}"
+        f"[SUCCESS] {source_path.name}"
     )
 
     print(
@@ -90,10 +100,101 @@ def ingest_to_bronze(
     )
 
     print(
-        f"Bronze output: {bronze_path}"
+        f"Bronze: {bronze_path}"
     )
 
     return df
+
+
+# ----------------------------------------------------------------------
+# PIPELINE
+# ----------------------------------------------------------------------
+
+def run_bronze_ingestion() -> None:
+    """
+    Execute Bronze ingestion for all configured datasets.
+    """
+
+    print("Bronze Layer Ingestion")
+    print("======================")
+
+    successful_datasets = []
+    failed_datasets = []
+
+    for dataset_name in DATASETS:
+
+        source_path = (
+            SOURCE_DIR
+            / f"{dataset_name}.parquet"
+        )
+
+        bronze_path = (
+            BRONZE_DIR
+            / f"{dataset_name}.parquet"
+        )
+
+        try:
+
+            ingest_to_bronze(
+                source_path,
+                bronze_path,
+            )
+
+            successful_datasets.append(
+                dataset_name
+            )
+
+        except Exception as error:
+
+            failed_datasets.append(
+                {
+                    "dataset": dataset_name,
+                    "error": str(error),
+                }
+            )
+
+            print(
+                f"[ERROR] "
+                f"{dataset_name}: "
+                f"{error}"
+            )
+
+    # --------------------------------------------------------------
+    # Execution summary
+    # --------------------------------------------------------------
+
+    print("\nIngestion Summary")
+    print("-----------------")
+
+    print(
+        f"Successful: "
+        f"{len(successful_datasets)}"
+    )
+
+    print(
+        f"Failed: "
+        f"{len(failed_datasets)}"
+    )
+
+    if failed_datasets:
+
+        print("\nFailed datasets:")
+
+        for failure in failed_datasets:
+
+            print(
+                f"- {failure['dataset']}: "
+                f"{failure['error']}"
+            )
+
+        raise RuntimeError(
+            "Bronze ingestion completed "
+            "with failures."
+        )
+
+    print(
+        "\nBronze ingestion completed successfully."
+    )
 
 
 # ----------------------------------------------------------------------
@@ -102,18 +203,4 @@ def ingest_to_bronze(
 
 if __name__ == "__main__":
 
-    print("Bronze Layer Ingestion")
-    print("----------------------")
-
-    source_file = (
-        SOURCE_DIR / "opportunities.parquet"
-    )
-
-    bronze_file = (
-        BRONZE_DIR / "opportunities.parquet"
-    )
-
-    ingest_to_bronze(
-        source_file,
-        bronze_file,
-    )
+    run_bronze_ingestion()
