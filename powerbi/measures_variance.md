@@ -4,7 +4,7 @@
 
 This layer extends the base Revenue, Target and Year-over-Year measures into accumulated performance and variance analysis.
 
-The measures are designed to support the main analytical questions of the Revenue Data Platform:
+The measures support the main analytical questions of the Revenue Data Platform:
 
 - How much revenue was realized?
 - How much was targeted?
@@ -59,6 +59,16 @@ while:
     March 2025
 
 The result represents the accumulated Year-over-Year variation.
+
+The calculation is:
+
+    Revenue YoY YTD
+        =
+    (Revenue YTD - Revenue LY YTD)
+        /
+    Revenue LY YTD
+
+The current implementation uses `0` as the alternate result when Revenue LY YTD is zero or unavailable.
 
 ---
 
@@ -158,6 +168,8 @@ Example:
 
     Achievement YTD = 90%
 
+The current implementation uses `0` as the alternate result when Target YTD is zero or unavailable.
+
 ---
 
 # Monthly vs YTD Measures
@@ -197,27 +209,29 @@ This separation prevents accumulated calculations from being mixed with monthly 
 The measures can be organized conceptually as:
 
     Revenue
-        │
-        ├── Revenue YTD
-        │       │
-        │       └── Revenue YoY YTD
-        │
-        ├── Revenue LY
-        │       │
-        │       └── Revenue LY YTD
-        │
-        └── Revenue YoY
+        |
+        +-- Revenue YTD
+        |       |
+        |       +-- Revenue YoY YTD
+        |
+        +-- Revenue LY
+        |       |
+        |       +-- Revenue LY YTD
+        |
+        +-- Revenue YoY
 
     Target
-        │
-        └── Target YTD
+        |
+        +-- Target YTD
 
     Revenue + Target
-        │
-        ├── Achievement %
-        ├── Achievement YTD
-        ├── Revenue Variance
-        └── Revenue Target Variance YTD
+        |
+        +-- Achievement %
+        +-- Achievement YTD
+        +-- Revenue Variance
+        +-- Revenue Target Variance YTD
+
+This structure emphasizes measure reuse and avoids duplicating aggregation logic.
 
 ---
 
@@ -242,16 +256,17 @@ No measure introduces a hardcoded brand, year or reporting period.
 
 # Safe Division
 
-Percentage measures use DIVIDE rather than direct division.
+Percentage measures use `DIVIDE` rather than direct division.
 
-This prevents calculation errors when the denominator is zero or unavailable.
+The current implementation uses an explicit alternate result of `0` for:
 
-The percentage measures are:
-
-- Achievement %
 - Achievement YTD
 - Revenue YoY
 - Revenue YoY YTD
+
+The base `Achievement %` measure does not specify an alternate result and therefore returns BLANK when the denominator is zero or unavailable.
+
+This difference reflects the current implementation of the Semantic Model.
 
 ---
 
@@ -284,9 +299,9 @@ Percentage measures should use:
 
 ---
 
-# Measure Layer Summary
+# Current Measure Set
 
-The current Semantic Model measure set is:
+The Semantic Model currently implements the following analytical measures.
 
 ## Base
 
@@ -315,4 +330,4 @@ The current Semantic Model measure set is:
 - Revenue Variance
 - Revenue Target Variance YTD
 
-This measure layer provides the foundation for the analytical Revenue vs Target reporting scenario.
+All measures are implemented in the current public Power BI Semantic Model.
