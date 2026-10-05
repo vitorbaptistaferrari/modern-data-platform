@@ -66,13 +66,17 @@ table 'Fact Revenue'
 		annotation SummarizationSetBy = Automatic
 
 	column revenue_value
-		dataType: int64
-		formatString: 0
+		dataType: double
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 1b2f7867-28e3-49ed-bd25-9f5524470345
 		summarizeBy: sum
 		sourceColumn: revenue_value
 
+		changedProperty = DataType
+
 		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	partition 'Fact Revenue' = m
 		mode: import

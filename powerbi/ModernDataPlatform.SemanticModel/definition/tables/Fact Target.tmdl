@@ -50,13 +50,17 @@ table 'Fact Target'
 		annotation SummarizationSetBy = Automatic
 
 	column target_value
-		dataType: int64
-		formatString: 0
+		dataType: double
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 86d321bc-7094-42e3-954f-d32852c7fdc2
 		summarizeBy: sum
 		sourceColumn: target_value
 
+		changedProperty = DataType
+
 		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	partition 'Fact Target' = m
 		mode: import

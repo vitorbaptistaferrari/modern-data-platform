@@ -4,21 +4,24 @@ table Medidas
 	measure Revenue =
 			
 			SUM ( 'Fact Revenue'[revenue_value] )
-		formatString: 0
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 2ac969f0-352f-44d9-8be9-8b88fc90688e
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	measure Target =
 			
 			SUM ( 'Fact Target'[target_value] )
-		formatString: 0
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 17fe7446-317b-4709-8e21-7d9e882eb5f2
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	measure 'Achievement %' =
 			
 			DIVIDE ( [Revenue], [Target] )
+		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: f440bf1e-2a02-4f4c-9a7b-ef8f3f07494f
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	measure 'Revenue YTD' =
 			
@@ -26,8 +29,10 @@ table Medidas
 			    [Revenue],
 			    DATESYTD ( 'Dim Calendar'[date] )
 			)
-		formatString: 0
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 171520dd-9e60-4a1a-b0ab-e170a9968b87
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	measure 'Target YTD' =
 			
@@ -35,8 +40,10 @@ table Medidas
 			    [Target],
 			    DATESYTD ( 'Dim Calendar'[date] )
 			)
-		formatString: 0
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 97e91865-08b7-493c-8b24-8fd89c374d97
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	measure 'Revenue LY' =
 			
@@ -44,8 +51,10 @@ table Medidas
 			    [Revenue],
 			    SAMEPERIODLASTYEAR ( 'Dim Calendar'[date] )
 			)
-		formatString: 0
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 2bfe358a-e19f-41e2-8339-bb569403371b
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	measure 'Revenue LY YTD' =
 			
@@ -53,8 +62,10 @@ table Medidas
 			    [Revenue YTD],
 			    SAMEPERIODLASTYEAR ( 'Dim Calendar'[date] )
 			)
-		formatString: 0
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 17ecff4b-26c6-447c-bc96-4af0224575d8
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	measure 'Revenue YoY' =
 			
@@ -63,9 +74,8 @@ table Medidas
 			    [Revenue LY],
 			    0
 			)
+		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: ed3ff6f8-b81d-4910-947a-0c469bff0764
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	measure 'Revenue YoY YTD' =
 			
@@ -74,21 +84,24 @@ table Medidas
 			    [Revenue LY YTD],
 			    0
 			)
+		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: cb0ebf0c-9740-4371-b87b-439f6dd7cb19
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	measure 'Revenue Variance' =
 			
 			[Revenue] - [Target]
-		formatString: 0
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: 50abf856-4937-45ed-95d5-2c87044ae5fc
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	measure 'Revenue Target Variance YTD' =
 			
 			[Revenue YTD] - [Target YTD]
-		formatString: 0
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
 		lineageTag: fb9b65bd-763b-4f71-a311-936ed5efe957
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
 
 	measure 'Achievement YTD' =
 			
@@ -97,9 +110,8 @@ table Medidas
 			    [Target YTD],
 			    0
 			)
+		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 00c1dc68-60a0-4f93-b9f8-fbf89cb15b55
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	column Column
 		isHidden
