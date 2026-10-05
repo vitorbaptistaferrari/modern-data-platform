@@ -2,7 +2,7 @@
 
 ## Base Measures
 
-The first semantic measures are built directly on top of the Gold fact tables.
+The semantic measure layer is built directly on top of the Gold fact tables.
 
 These measures provide the foundation for the analytical layer and are reused by more advanced calculations such as YTD, Year-over-Year and target achievement.
 
@@ -23,7 +23,7 @@ Returns the total realized revenue in the current filter context.
 
 The measure respects the filter context provided by the Semantic Model.
 
-For example, Revenue can be analyzed by:
+Revenue can be analyzed by:
 
 - Year
 - Month
@@ -34,7 +34,7 @@ For example, Revenue can be analyzed by:
 - Negotiation Type
 - Revenue Hierarchy
 
-The measure intentionally contains no hardcoded period or business classification.
+The measure contains no hardcoded reporting period or business classification.
 
 ---
 
@@ -53,7 +53,7 @@ Returns the total target value in the current filter context.
 
 The measure respects the shared dimensions available to Fact Target.
 
-It can therefore be analyzed by:
+Target can be analyzed by:
 
 - Year
 - Month
@@ -69,15 +69,14 @@ Target is stored independently from Revenue because actual revenue and business 
 
 ### Purpose
 
-Measures the percentage of target achieved by comparing realized revenue against the corresponding target.
+Measures the percentage of target achieved by comparing realized Revenue against the corresponding Target.
 
 ### DAX
 
     Achievement % =
     DIVIDE (
         [Revenue],
-        [Target],
-        0
+        [Target]
     )
 
 ### Analytical Behavior
@@ -102,9 +101,21 @@ A result of:
 
 The measure should be formatted as a percentage in the Semantic Model.
 
+### Missing Target Behavior
+
+The measure uses DIVIDE without a fallback value.
+
+When Target is zero or unavailable, the result is BLANK rather than 0%.
+
+This distinction is intentional.
+
+A zero percentage means that Revenue exists but represents zero achievement.
+
+A blank result indicates that there is no valid Target available for the current analytical context.
+
 ---
 
-# Measure Design Principles
+# Base Measure Design Principles
 
 ## Reusable Base Measures
 
@@ -134,20 +145,120 @@ Shared dimensions provide the analytical context used to compare them.
 
 ## Safe Division
 
-Achievement calculations use DIVIDE rather than direct division to avoid errors when the target is zero or unavailable.
+Percentage calculations use DIVIDE rather than direct division.
+
+When the denominator is zero or unavailable, the result is BLANK rather than an artificial 0%.
 
 ---
 
-# Next Measures
+# Time Intelligence Measures
 
-The next layer of measures will extend these base calculations into time intelligence and variance analysis.
-
-Planned measures include:
+The following measures extend the base calculations:
 
 - Revenue YTD
 - Target YTD
 - Revenue LY
 - Revenue LY YTD
 - Revenue YoY
+- Revenue YoY YTD
+
+These calculations use the shared Dim Calendar dimension.
+
+---
+
+# Variance Measures
+
+The analytical model uses explicit variance names to make the business meaning clear.
+
+## Revenue Variance
+
+Represents the difference between current Revenue and current Target.
+
+    Revenue Variance =
+    Revenue - Target
+
+## Revenue Target Variance YTD
+
+Represents the accumulated difference between Revenue YTD and Target YTD.
+
+    Revenue Target Variance YTD =
+    Revenue YTD - Target YTD
+
+The explicit naming prevents ambiguity between monthly variance, YTD variance and Year-over-Year variation.
+
+---
+
+# Measure Naming Principles
+
+Measure names should clearly communicate the analytical context.
+
+Avoid ambiguous names such as:
+
+- Variance
+- Growth
+- Previous
+- Target Difference
+
+Prefer explicit names such as:
+
 - Revenue Variance
-- Target Variance
+- Revenue Target Variance YTD
+- Revenue YoY
+- Revenue YoY YTD
+- Revenue LY
+- Revenue LY YTD
+
+This makes the Semantic Model easier to understand and consume.
+
+---
+
+# Formatting Recommendations
+
+| Measure | Format |
+|---|---|
+| Revenue | Currency |
+| Target | Currency |
+| Achievement % | Percentage |
+| Revenue Variance | Currency |
+| Revenue Target Variance YTD | Currency |
+
+The currency format should follow the Brazilian analytical context:
+
+    R$ #,##0.00
+
+Percentage measures should use:
+
+    0.00%
+
+---
+
+# Analytical Measure Set
+
+The complete analytical measure set planned for the Semantic Model is:
+
+## Base
+
+- Revenue
+- Target
+- Achievement %
+
+## YTD
+
+- Revenue YTD
+- Target YTD
+- Achievement YTD
+
+## Previous Year
+
+- Revenue LY
+- Revenue LY YTD
+
+## Year-over-Year
+
+- Revenue YoY
+- Revenue YoY YTD
+
+## Variance
+
+- Revenue Variance
+- Revenue Target Variance YTD
