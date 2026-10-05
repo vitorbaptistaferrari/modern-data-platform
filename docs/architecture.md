@@ -2,14 +2,37 @@
 
 ## Overview
 
-This project implements an end-to-end data platform using a Medallion Architecture.
+This project implements an end-to-end modern data platform using a Medallion Architecture.
 
-The platform is designed to transform operational revenue data into a trusted analytical layer for reporting and decision-making.
+The platform transforms operational revenue data into a trusted analytical model for reporting and decision-making.
+
+The architecture separates technical ingestion, data standardization, business transformation and analytical consumption into clearly defined layers.
+
+The implementation is based on synthetic data and is intentionally independent from any proprietary production environment.
+
+---
 
 ## Architecture Layers
 
-- Bronze — raw data ingestion
-- Silver — data standardization and transformation
-- Gold — business rules and dimensional modeling
-- Semantic Model — analytical relationships and measures
-- Power BI — data visualization and consumption
+The platform is organized into the following layers:
+
+```text
+Sources
+   │
+   ▼
+Ingestion
+   │
+   ▼
+Bronze
+   │
+   ▼
+Silver
+   │
+   ▼
+Gold
+   │
+   ▼
+Semantic Model
+   │
+   ▼
+Power BI
