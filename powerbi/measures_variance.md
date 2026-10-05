@@ -96,7 +96,7 @@ Example:
 
 ---
 
-## Target Variance
+## Revenue Target Variance YTD
 
 ### Purpose
 
@@ -104,7 +104,7 @@ Provides the accumulated difference between Revenue YTD and Target YTD.
 
 ### DAX
 
-    Target Variance =
+    Revenue Target Variance YTD =
     [Revenue YTD] - [Target YTD]
 
 ### Analytical Behavior
@@ -116,7 +116,7 @@ For example:
     Revenue YTD = 1,200,000
     Target YTD = 1,000,000
 
-    Target Variance = 200,000
+    Revenue Target Variance YTD = 200,000
 
 A positive result indicates that accumulated Revenue is above the accumulated Target.
 
@@ -176,7 +176,7 @@ The Semantic Model intentionally keeps monthly and accumulated measures separate
     Revenue YTD
     Target YTD
     Achievement YTD
-    Target Variance
+    Revenue Target Variance YTD
 
 ### Previous Year
 
@@ -217,7 +217,7 @@ The measures can be organized conceptually as:
         ├── Achievement %
         ├── Achievement YTD
         ├── Revenue Variance
-        └── Target Variance
+        └── Revenue Target Variance YTD
 
 ---
 
@@ -268,7 +268,7 @@ The Semantic Model should use the following display formats:
 | Revenue LY | Currency |
 | Revenue LY YTD | Currency |
 | Revenue Variance | Currency |
-| Target Variance | Currency |
+| Revenue Target Variance YTD | Currency |
 | Achievement % | Percentage |
 | Achievement YTD | Percentage |
 | Revenue YoY | Percentage |
@@ -313,6 +313,6 @@ The current Semantic Model measure set is:
 ## Variance
 
 - Revenue Variance
-- Target Variance
+- Revenue Target Variance YTD
 
 This measure layer provides the foundation for the analytical Revenue vs Target reporting scenario.
