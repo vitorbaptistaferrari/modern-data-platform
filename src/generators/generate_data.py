@@ -51,7 +51,9 @@ DEFAULT_CONFIG = GeneratorConfig(
 )
 
 
-def generate_customers(config: GeneratorConfig) -> pd.DataFrame:
+def generate_customers(
+    config: GeneratorConfig,
+) -> pd.DataFrame:
     """
     Generate synthetic customer records.
 
@@ -141,14 +143,21 @@ def generate_customers(config: GeneratorConfig) -> pd.DataFrame:
 
     records = []
 
-    for i in range(1, config.n_customers + 1):
+    for i in range(
+        1,
+        config.n_customers + 1,
+    ):
         state = random.choice(states)
-        city = random.choice(cities_by_state[state])
+        city = random.choice(
+            cities_by_state[state]
+        )
 
         records.append(
             {
                 "customer_id": f"CUST-{i:06d}",
-                "customer_name": f"Customer {i:06d}",
+                "customer_name": (
+                    f"Customer {i:06d}"
+                ),
                 "tax_id": "".join(
                     random.choices(
                         string.digits,
@@ -169,7 +178,9 @@ def generate_customers(config: GeneratorConfig) -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
-def generate_users(config: GeneratorConfig) -> pd.DataFrame:
+def generate_users(
+    config: GeneratorConfig,
+) -> pd.DataFrame:
     """
     Generate synthetic users representing commercial and
     operational responsibilities.
@@ -206,7 +217,10 @@ def generate_users(config: GeneratorConfig) -> pd.DataFrame:
 
     records = []
 
-    for i in range(1, config.n_users + 1):
+    for i in range(
+        1,
+        config.n_users + 1,
+    ):
         department = random.choice(
             departments
         )
@@ -228,17 +242,87 @@ def generate_users(config: GeneratorConfig) -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
+def generate_record_types() -> pd.DataFrame:
+    """
+    Generate synthetic opportunity record types.
+    """
+
+    records = [
+        {
+            "record_type_id": "RT-001",
+            "record_type_name": "New Business",
+        },
+        {
+            "record_type_id": "RT-002",
+            "record_type_name": "Existing Business",
+        },
+        {
+            "record_type_id": "RT-003",
+            "record_type_name": "Strategic Account",
+        },
+    ]
+
+    return pd.DataFrame(records)
+
+
+def generate_opportunity_stages() -> pd.DataFrame:
+    """
+    Generate synthetic opportunity stages.
+    """
+
+    records = [
+        {
+            "stage_id": "STG-001",
+            "stage_name": "Qualification",
+            "stage_order": 1,
+            "is_closed": False,
+            "is_won": False,
+        },
+        {
+            "stage_id": "STG-002",
+            "stage_name": "Proposal",
+            "stage_order": 2,
+            "is_closed": False,
+            "is_won": False,
+        },
+        {
+            "stage_id": "STG-003",
+            "stage_name": "Negotiation",
+            "stage_order": 3,
+            "is_closed": False,
+            "is_won": False,
+        },
+        {
+            "stage_id": "STG-004",
+            "stage_name": "Closed Won",
+            "stage_order": 4,
+            "is_closed": True,
+            "is_won": True,
+        },
+        {
+            "stage_id": "STG-005",
+            "stage_name": "Closed Lost",
+            "stage_order": 5,
+            "is_closed": True,
+            "is_won": False,
+        },
+    ]
+
+    return pd.DataFrame(records)
+
+
 def generate_opportunities(
     config: GeneratorConfig,
     customers: pd.DataFrame,
     users: pd.DataFrame,
+    record_types: pd.DataFrame,
+    stages: pd.DataFrame,
 ) -> pd.DataFrame:
     """
     Generate synthetic opportunity records.
 
-    Opportunities are linked to previously generated customers
-    and users and distributed across the configured reporting
-    period.
+    Opportunities are linked to previously generated
+    customers, users, record types and stages.
     """
 
     random.seed(config.seed + 2)
@@ -255,14 +339,6 @@ def generate_opportunities(
         "Expansion",
     ]
 
-    stages = [
-        "Qualification",
-        "Proposal",
-        "Negotiation",
-        "Closed Won",
-        "Closed Lost",
-    ]
-
     opportunity_origins = [
         "Inbound",
         "Outbound",
@@ -271,8 +347,21 @@ def generate_opportunities(
         "Existing Customer",
     ]
 
-    customer_ids = customers["customer_id"].tolist()
-    user_ids = users["user_id"].tolist()
+    customer_ids = (
+        customers["customer_id"].tolist()
+    )
+
+    user_ids = (
+        users["user_id"].tolist()
+    )
+
+    record_type_ids = (
+        record_types["record_type_id"].tolist()
+    )
+
+    stage_ids = (
+        stages["stage_id"].tolist()
+    )
 
     date_range_days = (
         config.end_date - config.start_date
@@ -280,15 +369,29 @@ def generate_opportunities(
 
     records = []
 
-    for i in range(1, config.n_opportunities + 1):
-        customer_id = random.choice(customer_ids)
-        user_id = random.choice(user_ids)
+    for i in range(
+        1,
+        config.n_opportunities + 1,
+    ):
+        customer_id = random.choice(
+            customer_ids
+        )
+
+        user_id = random.choice(
+            user_ids
+        )
+
+        record_type_id = random.choice(
+            record_type_ids
+        )
+
+        stage_id = random.choice(
+            stage_ids
+        )
 
         opportunity_type = random.choice(
             opportunity_types
         )
-
-        stage = random.choice(stages)
 
         opportunity_date = (
             config.start_date
@@ -300,10 +403,13 @@ def generate_opportunities(
             )
         )
 
-        close_date = opportunity_date + timedelta(
-            days=random.randint(
-                7,
-                120,
+        close_date = (
+            opportunity_date
+            + timedelta(
+                days=random.randint(
+                    7,
+                    120,
+                )
             )
         )
 
@@ -320,16 +426,27 @@ def generate_opportunities(
 
         records.append(
             {
-                "opportunity_id": f"OPP-{i:07d}",
+                "opportunity_id": (
+                    f"OPP-{i:07d}"
+                ),
                 "customer_id": customer_id,
                 "user_id": user_id,
-                "opportunity_type": opportunity_type,
-                "stage": stage,
-                "brand": random.choice(brands),
+                "record_type_id": (
+                    record_type_id
+                ),
+                "stage_id": stage_id,
+                "opportunity_type": (
+                    opportunity_type
+                ),
+                "brand": random.choice(
+                    brands
+                ),
                 "origin": random.choice(
                     opportunity_origins
                 ),
-                "opportunity_date": opportunity_date,
+                "opportunity_date": (
+                    opportunity_date
+                ),
                 "close_date": close_date,
                 "amount": amount,
             }
@@ -343,29 +460,50 @@ if __name__ == "__main__":
 
     print("Synthetic Data Generator")
     print("------------------------")
+
     print(
         f"Period: "
         f"{config.start_date} → "
         f"{config.end_date}"
     )
+
     print(
         f"Customers: "
         f"{config.n_customers}"
     )
+
     print(
         f"Users: "
         f"{config.n_users}"
     )
+
     print(
         f"Opportunities: "
         f"{config.n_opportunities}"
     )
+
     print(
         f"Seed: "
         f"{config.seed}"
     )
 
-    customers = generate_customers(config)
+    record_types = (
+        generate_record_types()
+    )
+
+    print("\nGenerated record types:")
+    print(record_types)
+
+    stages = (
+        generate_opportunity_stages()
+    )
+
+    print("\nGenerated opportunity stages:")
+    print(stages)
+
+    customers = generate_customers(
+        config
+    )
 
     print("\nGenerated customers:")
     print(customers.head())
@@ -375,7 +513,9 @@ if __name__ == "__main__":
         f"{len(customers)}"
     )
 
-    users = generate_users(config)
+    users = generate_users(
+        config
+    )
 
     print("\nGenerated users:")
     print(users.head())
@@ -389,6 +529,8 @@ if __name__ == "__main__":
         config,
         customers,
         users,
+        record_types,
+        stages,
     )
 
     print("\nGenerated opportunities:")
