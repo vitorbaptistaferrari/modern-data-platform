@@ -184,13 +184,61 @@ This distinction is important when building Revenue vs Target analytical visuals
 
 ---
 
-# Next Measures
+# Relationship with Other Time-Intelligence Measures
 
-The next time-intelligence layer will introduce:
+Revenue YTD and Target YTD are foundational measures for the other time-intelligence calculations in the Semantic Model.
+
+They are reused by:
+
+- Revenue LY YTD
+- Revenue YoY YTD
+- Revenue Target Variance YTD
+- Achievement YTD
+
+The measures therefore form a reusable calculation chain rather than duplicating aggregation logic.
+
+---
+
+# Current Time-Intelligence Measure Set
+
+The current Semantic Model implements the following time-related measures:
+
+## YTD
+
+- Revenue YTD
+- Target YTD
+- Achievement YTD
+
+## Previous Year
 
 - Revenue LY
 - Revenue LY YTD
+
+## Year-over-Year
+
 - Revenue YoY
-- Revenue Variance
-- Target Variance
-- Achievement YTD
+- Revenue YoY YTD
+
+All calculations use the shared `Dim Calendar` dimension.
+
+---
+
+# Design Principles
+
+## Centralized Calendar
+
+Time-intelligence calculations use the dedicated `Dim Calendar` dimension.
+
+## Reusable Measures
+
+More advanced calculations reuse the existing base and YTD measures.
+
+## No Hardcoded Periods
+
+The calculations do not depend on a specific reporting year.
+
+## Monthly vs YTD Separation
+
+Monthly values and accumulated values are kept as separate measures.
+
+This prevents cumulative calculations from being mixed with individual-period values.

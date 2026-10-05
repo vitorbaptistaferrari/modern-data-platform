@@ -1,178 +1,105 @@
-# Semantic Model
+# Power BI Semantic Model
 
-## Overview
+## Purpose
 
-The Semantic Model is the analytical consumption layer built on top of the Gold layer.
+The Power BI Semantic Model represents the analytical layer of the `modern-data-platform` project.
 
-Its purpose is to expose a consistent analytical structure for reporting and business intelligence workloads.
+It provides a dimensional structure for revenue and target analysis, including shared dimensions, analytical fact tables, business hierarchies and reusable DAX measures.
 
-The model follows a star schema pattern, with fact tables at the center and descriptive dimensions surrounding them.
+The model is designed according to the analytical structures defined in the Gold layer.
 
-The Semantic Model does not apply source ingestion or technical transformation logic.
+The semantic model is not considered a fourth Medallion layer. It is the analytical modeling layer used to organize data for reporting and business intelligence.
 
-Its responsibilities are:
+## Public Reproducibility
 
-- Define analytical relationships
-- Expose business-friendly dimensions
-- Provide reusable measures
-- Support time intelligence
-- Enable consistent Power BI analysis
+The public repository does not connect the Power BI project directly to production systems, proprietary databases or internal data platforms.
 
----
+Instead, the Power BI project uses a controlled synthetic dataset embedded directly in the semantic model.
 
-## Model Structure
+The synthetic dataset reproduces the analytical structures and business concepts defined by the Gold layer.
 
-The Semantic Model is composed of two fact tables and a set of shared and fact-specific dimensions.
+This approach provides:
+
+- Reproducibility
+- Functional Power BI analysis
+- No dependency on external infrastructure
+- No exposure of proprietary data
+- Clear separation between production architecture and public demonstration
+
+The relationship between the Data Engineering and Analytics components can therefore be understood as:
+
+    Synthetic Sources
+            |
+            v
+        Bronze
+            |
+            v
+        Silver
+            |
+            v
+          Gold
+            |
+            | analytical structures
+            v
+    Synthetic Analytical Dataset
+            |
+            v
+    Power BI Semantic Model
+            |
+            v
+       Power BI Report
+
+The Gold layer and the Power BI Semantic Model are architecturally aligned, but the public Power BI project does not require a physical runtime connection to the Gold layer.
+
+## Model Architecture
+
+The semantic model follows a star-schema design.
+
+The model contains two analytical fact tables supported by shared and role-specific dimensions.
 
 ### Fact Tables
 
-- Fact Revenue
-- Fact Target
+#### Fact Revenue
 
-### Dimensions
+`Fact Revenue` represents analytical revenue occurrences.
 
-- Dim Brand
-- Dim Calendar
-- Dim User
-- Dim Opportunity
-- Dim Opportunity Stage
-- Dim Negotiation Type
-- Dim Target Type
-- Dim Revenue Hierarchy
+The current public implementation uses one analytical revenue occurrence per opportunity that meets the revenue criteria.
 
----
+Main analytical attributes include:
 
-## Star Schema
+- Revenue
+- Opportunity
+- User
+- Brand
+- Calendar
+- Opportunity Stage
+- Negotiation Type
+- Revenue Hierarchy
 
-Conceptually, the model follows this structure:
+The fact table contains foreign keys to the corresponding dimensions and the analytical revenue value.
 
-    Dim Calendar
-          │
-          ├──────────────► Fact Revenue
-          │
-          └──────────────► Fact Target
+#### Fact Target
 
-    Dim Brand
-          │
-          ├──────────────► Fact Revenue
-          │
-          └──────────────► Fact Target
+`Fact Target` represents analytical target values.
 
-    Dim Revenue Hierarchy
-          │
-          ├──────────────► Fact Revenue
-          │
-          └──────────────► Fact Target
+The grain of the table is defined by:
 
-    Dim User
-          │
-          └──────────────► Fact Revenue
+- Period
+- Brand
+- Analytical Target Type
+- Target Nature
 
-    Dim Opportunity
-          │
-          └──────────────► Fact Revenue
-
-    Dim Opportunity Stage
-          │
-          └──────────────► Fact Revenue
-
-    Dim Negotiation Type
-          │
-          └──────────────► Fact Revenue
-
-    Dim Target Type
-          │
-          └──────────────► Fact Target
-
----
-
-## Fact Revenue
-
-### Purpose
-
-Fact Revenue represents analytical revenue generated from opportunity-related business rules.
-
-### Grain
-
-The current public implementation represents one analytical revenue occurrence per opportunity.
-
-The fact structure is designed so that the grain can evolve if future business rules require multiple revenue components per opportunity.
-
-### Key
-
-Primary analytical key:
-
-`revenue_sk`
-
-### Foreign Keys
-
-- `calendar_sk`
-- `brand_sk`
-- `user_sk`
-- `opportunity_sk`
-- `opportunity_stage_sk`
-- `negotiation_type_sk`
-- `revenue_hierarchy_sk`
-
-### Measure Columns
-
-- `revenue_value`
-
----
-
-## Fact Target
-
-### Purpose
-
-Fact Target represents business targets by reporting period, brand and analytical target classification.
-
-### Grain
-
-The target grain is:
-
-`period + brand + target_type + nature`
-
-### Key
-
-Primary analytical key:
-
-`target_fact_sk`
-
-### Foreign Keys
-
-- `calendar_sk`
-- `brand_sk`
-- `target_type_sk`
-- `revenue_hierarchy_sk`
-
-### Measure Columns
-
-- `target_value`
-
-### Descriptive Columns
-
-- `nature`
-
----
+The table contains the target value associated with the corresponding analytical context.
 
 ## Dimensions
 
+The semantic model contains the following dimensions:
+
 ### Dim Calendar
 
-### Purpose
+Provides the time dimension used by the analytical model.
 
-Provides the shared time dimension for Revenue and Target analysis.
-
-### Key
-
-`calendar_sk`
-
-### Relationship Targets
-
-- Fact Revenue
-- Fact Target
-
-### Main Attributes
+Main attributes include:
 
 - Date
 - Year
@@ -180,320 +107,113 @@ Provides the shared time dimension for Revenue and Target analysis.
 - Month Name
 - Month-Year
 - Quarter
-- Year-Quarter
-- Day of Month
-- Day of Week
-- Day Name
 
----
+The calendar dimension is used as the primary time context for time-intelligence calculations.
 
 ### Dim Brand
 
-### Purpose
-
-Provides the analytical brand context.
-
-### Key
-
-`brand_sk`
-
-### Relationship Targets
-
-- Fact Revenue
-- Fact Target
-
-### Main Attribute
-
-- Brand
-
----
+Represents the brands used in revenue and target analysis.
 
 ### Dim User
 
-### Purpose
-
-Provides the user or responsible-person context for revenue analysis.
-
-### Key
-
-`user_sk`
-
-### Relationship Target
-
-- Fact Revenue
-
-### Main Attributes
-
-- User
-- Department
-- Role
-- Active Status
-
----
+Represents the users associated with analytical revenue occurrences.
 
 ### Dim Opportunity
 
-### Purpose
-
-Provides descriptive context for revenue generated from opportunities.
-
-### Key
-
-`opportunity_sk`
-
-### Relationship Target
-
-- Fact Revenue
-
-### Main Attributes
-
-- Opportunity
-- Customer
-- City
-- State
-- Segment
-- Opportunity Type
-- Brand
-- Origin
-- Opportunity Date
-- Close Date
-
----
+Represents the opportunity-level business entity associated with revenue.
 
 ### Dim Opportunity Stage
 
-### Purpose
-
-Provides the analytical sales-stage context.
-
-### Key
-
-`opportunity_stage_sk`
-
-### Relationship Target
-
-- Fact Revenue
-
-### Main Attributes
-
-- Stage
-- Stage Order
-- Closed Indicator
-- Won Indicator
-
----
+Represents the lifecycle stage of an opportunity.
 
 ### Dim Negotiation Type
 
-### Purpose
-
-Provides the analytical classification of the commercial negotiation.
-
-### Key
-
-`negotiation_type_sk`
-
-### Relationship Target
-
-- Fact Revenue
-
-### Main Attributes
-
-- Negotiation Type
-
-Current analytical classifications include:
+Represents the broader analytical negotiation categories:
 
 - Prospecting
 - Renewal
 - Expansion
-
----
 
 ### Dim Target Type
 
-### Purpose
+Represents the analytical categories used for target allocation.
 
-Provides the analytical classification of target records.
+### Dim Revenue Hierarchy
 
-### Key
+Provides a more detailed analytical hierarchy for revenue.
 
-`target_type_sk`
+The public model includes:
 
-### Relationship Target
+- Prospecting
+- Renewal
+- Expansion
+- Cross-Sell
+- Up-Sell
 
-- Fact Target
+This allows analysis at both the broader negotiation level and the more detailed revenue hierarchy level.
 
-### Main Attributes
+## Relationships
 
-- Target Type
+The semantic model follows a dimensional relationship pattern.
 
-Current analytical classifications include:
+Dimensions provide filtering context for the fact tables.
+
+The intended relationship structure is:
+
+    Dim Calendar --------\
+    Dim Brand ------------\
+    Dim User --------------\
+    Dim Opportunity --------> Fact Revenue
+    Dim Opportunity Stage --/
+    Dim Negotiation Type --/
+    Dim Revenue Hierarchy -/
+
+    Dim Calendar --------\
+    Dim Brand ------------\
+    Dim Target Type --------> Fact Target
+    Dim Revenue Hierarchy -/
+
+The model does not use direct fact-to-fact relationships.
+
+Shared dimensions allow revenue and target analysis to be performed within a consistent analytical context.
+
+## Revenue Business Logic
+
+The analytical revenue structure is based on three primary negotiation categories:
 
 - Prospecting
 - Renewal
 - Expansion
 
----
+Expansion can be further classified into:
 
-### Dim Revenue Hierarchy
+- Expansion
+- Cross-Sell
+- Up-Sell
 
-### Purpose
+Revenue is associated with opportunities that meet the public implementation's revenue criteria.
 
-Provides the shared revenue classification hierarchy used by both facts.
+The public implementation intentionally uses synthetic business rules and values to demonstrate the analytical model without reproducing proprietary production logic.
 
-### Key
+## Target Modeling
 
-`revenue_hierarchy_sk`
+Targets are modeled independently from revenue.
 
-### Relationship Targets
+This separation allows target values to be analyzed by:
 
-- Fact Revenue
-- Fact Target
-
-### Hierarchy
-
-    Revenue
-    ├── Prospecting
-    │   └── Prospecting
-    │
-    ├── Renewal
-    │   └── Renewal
-    │
-    └── Expansion
-        ├── Expansion
-        ├── Cross-Sell
-        └── Up-Sell
-
-The aggregated Expansion member allows target values to be analyzed at the Expansion level.
-
-The Cross-Sell and Up-Sell members allow revenue to be analyzed at a more detailed level.
-
----
-
-# Relationships
-
-All relationships follow a dimensional modeling pattern:
-
-**Dimension → Fact**
-
-The expected cardinality is:
-
-**1 : Many**
-
-The expected filter direction is:
-
-**Single**
-
-The facts do not have direct relationships with each other.
-
----
-
-## Fact Revenue Relationships
-
-| Dimension | Dimension Key | Fact Foreign Key | Cardinality | Cross-filter |
-|---|---|---|---|---|
-| Dim Calendar | `calendar_sk` | `calendar_sk` | 1 : * | Single |
-| Dim Brand | `brand_sk` | `brand_sk` | 1 : * | Single |
-| Dim User | `user_sk` | `user_sk` | 1 : * | Single |
-| Dim Opportunity | `opportunity_sk` | `opportunity_sk` | 1 : * | Single |
-| Dim Opportunity Stage | `opportunity_stage_sk` | `opportunity_stage_sk` | 1 : * | Single |
-| Dim Negotiation Type | `negotiation_type_sk` | `negotiation_type_sk` | 1 : * | Single |
-| Dim Revenue Hierarchy | `revenue_hierarchy_sk` | `revenue_hierarchy_sk` | 1 : * | Single |
-
----
-
-## Fact Target Relationships
-
-| Dimension | Dimension Key | Fact Foreign Key | Cardinality | Cross-filter |
-|---|---|---|---|---|
-| Dim Calendar | `calendar_sk` | `calendar_sk` | 1 : * | Single |
-| Dim Brand | `brand_sk` | `brand_sk` | 1 : * | Single |
-| Dim Target Type | `target_type_sk` | `target_type_sk` | 1 : * | Single |
-| Dim Revenue Hierarchy | `revenue_hierarchy_sk` | `revenue_hierarchy_sk` | 1 : * | Single |
-
----
-
-# Relationship Principles
-
-## No Fact-to-Fact Relationships
-
-Fact Revenue and Fact Target are intentionally independent.
-
-The two facts are analyzed through shared dimensions such as:
-
-- Calendar
+- Period
 - Brand
+- Target Type
 - Revenue Hierarchy
+- Target Nature
 
-This prevents direct fact-to-fact filtering and avoids ambiguous analytical paths.
+The independent target fact table avoids direct fact-to-fact relationships and preserves the dimensional modeling approach.
 
----
+## DAX Measures
 
-## No Dimension-to-Dimension Relationships
+The semantic model contains reusable measures for the main analytical calculations.
 
-Dimensions are not directly related to one another in the Semantic Model.
-
-Each dimension connects directly to the fact table that requires its analytical context.
-
-This preserves the star schema structure.
-
----
-
-## Surrogate Keys
-
-Relationships use deterministic surrogate keys generated in the Gold layer.
-
-For example:
-
-`Dim Brand[brand_sk]`
-
-relates to:
-
-`Fact Revenue[brand_sk]`
-
-rather than using the descriptive brand value.
-
-This keeps analytical relationships based on stable Gold-layer identifiers.
-
----
-
-# Shared Dimensions
-
-Some dimensions are shared across both fact tables.
-
-### Dim Calendar
-
-    Dim Calendar
-         │
-         ├──► Fact Revenue
-         │
-         └──► Fact Target
-
-### Dim Brand
-
-    Dim Brand
-         │
-         ├──► Fact Revenue
-         │
-         └──► Fact Target
-
-### Dim Revenue Hierarchy
-
-    Dim Revenue Hierarchy
-         │
-         ├──► Fact Revenue
-         │
-         └──► Fact Target
-
-Shared dimensions allow Revenue and Target to be analyzed using common business contexts.
-
----
-
-# Analytical Measures
-
-The Semantic Model will expose reusable analytical measures rather than requiring report authors to recreate calculations.
-
-Planned measures include:
+Current measures include:
 
 - Revenue
 - Target
@@ -503,101 +223,119 @@ Planned measures include:
 - Revenue LY
 - Revenue LY YTD
 - Revenue YoY
+- Revenue YoY YTD
 - Revenue Variance
-- Target Variance
+- Revenue Target Variance YTD
+- Achievement YTD
 
-The exact DAX implementation will be defined after the relationship model is established.
+### Revenue
 
----
+Calculates the total analytical revenue within the current filter context.
 
-# Time Intelligence
+### Target
 
-The Calendar dimension is shared between Revenue and Target.
+Calculates the total target value within the current filter context.
 
-This allows common time filters to be applied to both facts.
+### Achievement %
 
-Examples include:
+Calculates revenue achievement relative to the target.
 
-- Year
-- Quarter
-- Month
-- Month-Year
-- YTD
-- Previous Year
-- Year-over-Year
+### Revenue YTD
 
-The calendar is generated dynamically from the relevant Silver source periods and is not tied to a fixed reporting year.
+Calculates cumulative revenue from the beginning of the year through the current date context.
 
----
+### Target YTD
 
-# Semantic Layer Responsibilities
+Calculates cumulative target from the beginning of the year through the current date context.
 
-The Semantic Model is responsible for analytical interpretation, not source processing.
+### Revenue LY
 
-### Data Engineering
+Calculates revenue for the corresponding period in the previous year.
 
-Bronze and Silver handle:
+### Revenue LY YTD
 
-- Ingestion
-- Standardization
-- Technical quality
-- Deduplication
+Calculates year-to-date revenue for the corresponding period in the previous year.
 
-### Analytical Modeling
+### Revenue YoY
 
-Gold handles:
+Calculates the year-over-year variation between current revenue and previous-year revenue.
 
-- Business rules
-- Facts
-- Dimensions
-- Surrogate keys
-- Revenue classification
+### Revenue YoY YTD
 
-### Semantic Modeling
+Calculates the year-over-year variation between current YTD revenue and previous-year YTD revenue.
 
-The Semantic Model handles:
+### Revenue Variance
 
-- Relationships
-- Measures
-- Time intelligence
-- Analytical hierarchies
-- Business-friendly consumption
+Calculates the difference between revenue and target.
 
-### Visualization
+### Revenue Target Variance YTD
 
-Power BI handles:
+Calculates the difference between cumulative revenue and cumulative target.
 
-- Reports
-- Dashboards
-- Charts
-- User interaction
+### Achievement YTD
 
----
+Calculates cumulative revenue achievement against cumulative target.
 
-# Design Principles
+## Time Intelligence
 
-## Star Schema
+Time intelligence calculations are based on `Dim Calendar`.
 
-The model follows a star schema to simplify analytical querying and reduce relationship ambiguity.
+The model uses the calendar dimension as the primary date context for:
 
-## Shared Dimensions
+- YTD calculations
+- Previous-year calculations
+- Year-over-year analysis
 
-Common business dimensions are reused across facts whenever they represent the same analytical concept.
+The semantic model therefore separates time-intelligence logic from transactional date attributes and centralizes analytical time context in the calendar dimension.
 
-## Single-Direction Filtering
+## Gold Layer Alignment
 
-Relationships use single-direction filtering from dimensions toward facts unless a future analytical requirement explicitly justifies another pattern.
+The semantic model follows the analytical concepts established in the Gold layer.
 
-## Reusable Measures
+This includes:
 
-Business calculations are implemented as reusable semantic measures rather than duplicated in individual reports.
+- Dimensional modeling
+- Revenue and target facts
+- Shared analytical dimensions
+- Surrogate-key-based relationships
+- Revenue hierarchy
+- Business-oriented analytical structures
+- Time-based analysis
 
-## Separation of Concerns
+The purpose of this alignment is to ensure that the analytical model represents the same conceptual structures as the engineered data platform.
 
-The Semantic Model does not contain source ingestion or technical transformation logic.
+The public Power BI implementation does not claim to reproduce a production connection between Gold and Power BI.
 
-## Analytical Stability
+Instead, it demonstrates how the analytical structures produced by the data engineering layer can be represented and consumed by a BI semantic model.
 
-The Semantic Model is designed to remain stable as source volumes and reporting periods evolve.
+## Design Principles
 
-> **The data changes. The architecture remains.**
+The semantic model follows these principles:
+
+- Star-schema dimensional modeling
+- Shared dimensions
+- Explicit business concepts
+- Reusable DAX measures
+- Centralized calendar dimension
+- Separation of facts and dimensions
+- No fact-to-fact relationships
+- Separation between data engineering and presentation
+- Reproducibility
+- Synthetic data for public demonstration
+- No dependency on proprietary infrastructure
+
+## Public Scope
+
+This semantic model is part of a public portfolio project.
+
+Production data, proprietary business information, internal identifiers, credentials and company-specific infrastructure are intentionally excluded.
+
+The objective is to demonstrate the technical reasoning behind a modern analytical architecture while keeping the project functional, reproducible and safe to publish.
+
+The model therefore prioritizes:
+
+- Architectural clarity
+- Analytical consistency
+- Reproducibility
+- Technical transparency
+- Public usability

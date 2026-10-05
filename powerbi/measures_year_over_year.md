@@ -90,7 +90,7 @@ This preserves the same accumulated period across years.
 
 ---
 
-# Year-over-Year
+# Year-over-Year Measures
 
 ## Revenue YoY
 
@@ -113,18 +113,11 @@ The measure compares the current period against the equivalent previous-year per
 
 The calculation is:
 
-    Current Revenue
-        -
-    Previous Year Revenue
-        ÷
-    Previous Year Revenue
-
-Conceptually:
-
-    Revenue YoY =
-        (Revenue - Revenue LY)
+    Revenue YoY
+        =
+    (Revenue - Revenue LY)
         /
-        Revenue LY
+    Revenue LY
 
 Examples:
 
@@ -133,6 +126,77 @@ Examples:
 - `-0.10` represents a 10% decrease.
 
 The measure should be formatted as a percentage in the Semantic Model.
+
+### Zero or Unavailable Previous-Year Revenue
+
+The current implementation uses `0` as the alternate result of `DIVIDE`.
+
+Therefore, when Revenue LY is zero or unavailable, the measure returns `0`.
+
+This behavior reflects the current DAX implementation.
+
+---
+
+## Revenue YoY YTD
+
+### Purpose
+
+Measures the percentage variation between accumulated Revenue in the current year and the equivalent accumulated period in the previous year.
+
+### DAX
+
+    Revenue YoY YTD =
+    DIVIDE (
+        [Revenue YTD] - [Revenue LY YTD],
+        [Revenue LY YTD],
+        0
+    )
+
+### Analytical Behavior
+
+The measure compares:
+
+    Revenue YTD
+        vs
+    Revenue LY YTD
+
+For example, when the current context is March 2026:
+
+    Revenue YTD
+        =
+    January 2026
+    +
+    February 2026
+    +
+    March 2026
+
+while:
+
+    Revenue LY YTD
+        =
+    January 2025
+    +
+    February 2025
+    +
+    March 2025
+
+The result represents the accumulated Year-over-Year variation.
+
+The calculation is:
+
+    Revenue YoY YTD
+        =
+    (Revenue YTD - Revenue LY YTD)
+        /
+    Revenue LY YTD
+
+### Zero or Unavailable Previous-Year Revenue
+
+The current implementation uses `0` as the alternate result of `DIVIDE`.
+
+Therefore, when Revenue LY YTD is zero or unavailable, the measure returns `0`.
+
+This behavior reflects the current DAX implementation.
 
 ---
 
@@ -160,6 +224,16 @@ Example:
         vs
     January–March 2025
 
+Similarly, Revenue YoY and Revenue YoY YTD represent different comparison contexts.
+
+### Revenue YoY
+
+Measures the variation for the current filter period.
+
+### Revenue YoY YTD
+
+Measures the variation for the accumulated year-to-date period.
+
 Keeping these calculations separate prevents monthly and accumulated comparisons from being mixed.
 
 ---
@@ -177,7 +251,6 @@ The Calendar dimension provides:
 - Month
 - Month-Year
 - Quarter
-- Year-Quarter
 
 The measures do not use hardcoded years.
 
@@ -229,9 +302,9 @@ Therefore:
 
 For a March YTD comparison:
 
-| Period | Revenue YTD | Revenue LY YTD |
-|---|---:|---:|
-| March | 450 | 420 |
+| Period | Revenue YTD | Revenue LY YTD | Revenue YoY YTD |
+|---|---:|---:|---:|
+| March | 450 | 420 | 7.14% |
 
 The corresponding YTD variation is:
 
@@ -239,7 +312,7 @@ The corresponding YTD variation is:
 
     = 7.14%
 
-The YTD variation can be added as a separate measure once the base LY measures have been validated.
+This calculation is implemented by the `Revenue YoY YTD` measure.
 
 ---
 
@@ -257,22 +330,27 @@ The measures do not depend on a specific year.
 
 Revenue LY YTD reuses Revenue YTD rather than duplicating its aggregation logic.
 
+Revenue YoY YTD reuses Revenue YTD and Revenue LY YTD.
+
 ## Separation of Monthly and YTD Analysis
 
 Monthly comparisons and accumulated comparisons remain separate measures.
 
 ## Safe Division
 
-DIVIDE is used to prevent errors when the previous-year value is zero or unavailable.
+`DIVIDE` is used to prevent calculation errors when the previous-year value is zero or unavailable.
+
+The current implementation explicitly uses `0` as the alternate result for the Year-over-Year measures.
 
 ---
 
-# Next Measures
+# Current Year-over-Year Measure Set
 
-The next analytical layer will introduce:
+The Semantic Model currently implements:
 
+- Revenue LY
+- Revenue LY YTD
+- Revenue YoY
 - Revenue YoY YTD
-- Revenue Variance
-- Target Variance
-- Achievement YTD
-- Achievement YTD vs Previous Year
+
+These measures provide the previous-year and Year-over-Year comparison layer of the analytical model.
