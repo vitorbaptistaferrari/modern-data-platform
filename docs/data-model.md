@@ -2,25 +2,26 @@
 
 ## Overview
 
-The project uses synthetic data to simulate an operational revenue environment.
+The data model represents a synthetic revenue analytics platform designed to demonstrate data engineering and analytical modeling concepts using a Medallion Architecture.
 
-The data model is designed to represent the main entities required to support revenue analytics while remaining independent from any proprietary or production dataset.
+The model is organized into two main source domains:
 
-The model is intentionally data-volume and time-period agnostic.
+- CRM Data
+- Target Data
 
-New customers, opportunities, transactions and reporting periods can be introduced without changing the underlying architecture.
+The source entities are transformed through the Bronze, Silver and Gold layers before being consumed by the analytical model.
+
+The public implementation uses synthetic data and does not expose production structures, identifiers or proprietary business information.
 
 ---
 
 ## Source Domains
 
-The synthetic environment is composed of two main source domains:
+### CRM Data
 
-### CRM
+The CRM domain represents commercial and operational entities required to support revenue analysis.
 
-The CRM source represents operational commercial data.
-
-Main entities:
+The main entities are:
 
 - Customer
 - Opportunity
@@ -30,45 +31,29 @@ Main entities:
 - Record Type
 - Opportunity Stage
 
-Customer records contain location attributes such as city and state as part of the synthetic CRM dataset.
+These entities represent a simplified CRM environment and are used as the conceptual foundation for the revenue analytical model.
 
 ### Target Data
 
-Target data represents business targets by period, brand and revenue classification.
+The Target domain represents commercial targets used for performance analysis.
+
+Target data contains information related to:
+
+- Period
+- Brand
+- Target type
+- Target nature
+- Target value
+
+Target data is transformed independently and later integrated into the Gold analytical layer.
 
 ---
 
-## Entity Relationships
-
-The main conceptual relationships are:
-
-    Customer
-       |
-       +--< Opportunity
-                 |
-                 +--< Contract
-                 |
-                 +--< Quote
-
-    User
-       |
-       +--< Opportunity
-
-    Opportunity Stage
-       |
-       +--< Opportunity
-
-    Record Type
-       |
-       +--< Opportunity
-
-The relationships above represent the conceptual structure of the synthetic operational data.
-
----
+# CRM Entities
 
 ## Customer
 
-The Customer entity represents organizations participating in the commercial process.
+Represents customers associated with commercial opportunities.
 
 Representative attributes include:
 
@@ -76,23 +61,19 @@ Representative attributes include:
 - Customer name
 - City
 - State
-- Customer segment
 
-The geographic attributes are generated as part of the synthetic customer dataset.
-
-No external geographic reference dataset is required by the current public implementation.
+The geographic attributes are maintained directly within the synthetic CRM dataset and do not depend on an external geographic reference table.
 
 ---
 
 ## Opportunity
 
-The Opportunity entity represents commercial opportunities associated with customers.
+Represents commercial opportunities associated with customers and users.
 
 Representative attributes include:
 
 - Opportunity identifier
 - Customer identifier
-- Opportunity name
 - Opportunity type
 - Brand
 - Opportunity stage
@@ -100,105 +81,107 @@ Representative attributes include:
 - Opportunity date
 - Close date
 
-Opportunities provide the central business entity from which revenue-oriented analytical structures are derived.
+Opportunities represent the main business entity used to derive analytical revenue.
+
+The Gold layer applies business rules based on opportunity type, stage and related commercial information to determine analytical revenue.
 
 ---
 
 ## Contract
 
-The Contract entity represents contractual information associated with customers and commercial opportunities.
+Represents contractual information associated with commercial opportunities.
 
-Contract data can provide additional context for revenue calculations, particularly for renewal-oriented scenarios.
+Representative attributes include:
+
+- Contract identifier
+- Opportunity identifier
+- Contract status
+- Contract value
+
+Contract information supports revenue calculations for retention scenarios.
 
 ---
 
 ## Quote
 
-The Quote entity represents commercial quotations associated with opportunities.
+Represents commercial quotations associated with opportunities.
 
-Quote information can provide additional context for revenue calculations, particularly for expansion-oriented scenarios.
+Representative attributes include:
+
+- Quote identifier
+- Opportunity identifier
+- Quote status
+- Quote value
+
+Quote information supports revenue calculations for expansion scenarios.
 
 ---
 
 ## User
 
-The User entity represents commercial users associated with opportunities.
+Represents commercial users responsible for opportunities.
 
 Representative attributes include:
 
 - User identifier
 - User name
-- Role
-- Active status
+
+Users are represented as a Gold dimension and are associated with analytical revenue through the opportunity structure.
 
 ---
 
 ## Opportunity Stage
 
-The Opportunity Stage entity represents the lifecycle stage of an opportunity.
+Represents the lifecycle stage of an opportunity.
 
-Examples include:
+Representative attributes include:
 
-- Qualification
-- Proposal
-- Closed Won
-- Closed Lost
+- Stage identifier
+- Stage name
+- Stage order
 
-The stage information is used by the analytical layer to determine the treatment of opportunities for revenue analysis.
+The opportunity stage is used to determine whether an opportunity qualifies for analytical revenue.
 
 ---
 
 ## Record Type
 
-The Record Type entity represents classifications associated with CRM opportunities.
+Represents the classification of CRM opportunities.
 
-It provides additional structural context for the operational CRM model.
+Representative attributes include:
+
+- Record type identifier
+- Record type name
+
+Record types provide structural classification information used during the transformation process.
 
 ---
 
-## Target Data
+# Target Data
 
-Target data represents analytical targets independently from operational opportunity data.
+## Target
 
-Targets are associated with:
+Target data represents commercial performance goals.
 
-- Period
+Representative attributes include:
+
+- Target period
 - Brand
-- Target classification
+- Target type
+- Target nature
 - Target value
 
-The target domain is transformed into the analytical `Fact Target` structure in the Gold layer.
+The Gold layer transforms these attributes into the analytical target structure.
 
 ---
 
-## Analytical Model
+# Gold Analytical Model
 
-The operational source entities are transformed through the Medallion Architecture.
+The Gold layer reorganizes the standardized source data into a dimensional analytical model.
 
-The conceptual flow is:
+The main analytical structures are:
 
-    Synthetic CRM / Target Data
-              |
-              v
-           Bronze
-              |
-              v
-           Silver
-              |
-              v
-            Gold
-              |
-              v
-    Analytical Dimensions
-    and Fact Tables
-
-The Gold layer contains the analytical structures used by the public Power BI semantic model.
-
----
-
-## Gold Analytical Structures
-
-The Gold layer contains the following dimensions:
+### Dimensions
 
 - Dim Calendar
 - Dim Brand
@@ -209,7 +192,7 @@ The Gold layer contains the following dimensions:
 - Dim Target Type
 - Dim Revenue Hierarchy
 
-The main analytical fact tables are:
+### Facts
 
 - Fact Revenue
 - Fact Target
@@ -218,49 +201,46 @@ The main analytical fact tables are:
 
 ## Fact Revenue
 
-`Fact Revenue` represents analytical revenue occurrences.
+The `Fact Revenue` table represents analytical revenue events.
 
-The current public implementation uses one analytical revenue occurrence per qualifying opportunity.
+Its grain is defined as:
 
-The fact table contains references to dimensions such as:
+> One analytical revenue occurrence per qualifying opportunity.
 
-- Calendar
-- Brand
-- User
-- Opportunity
-- Opportunity Stage
-- Negotiation Type
-- Revenue Hierarchy
+Revenue values are derived according to the applicable business rules.
 
-The analytical revenue value is stored in the fact table.
+The revenue logic considers different commercial scenarios, including:
+
+- Prospecting
+- Renewal
+- Expansion
+
+Expansion can additionally be classified into:
+
+- Cross-Sell
+- Up-Sell
+
+The fact table contains foreign keys to the relevant analytical dimensions.
 
 ---
 
 ## Fact Target
 
-`Fact Target` represents analytical target values.
+The `Fact Target` table represents analytical commercial targets.
 
-The current grain is defined by:
+Its grain is defined as:
 
-- Period
-- Brand
-- Analytical Target Type
-- Target Nature
+> One target record per period, brand, analytical target type and target nature.
 
-The fact table contains references to:
-
-- Calendar
-- Brand
-- Target Type
-- Revenue Hierarchy
+The table contains foreign keys to the relevant analytical dimensions and stores the target value used for performance analysis.
 
 ---
 
-## Revenue Hierarchy
+# Revenue Hierarchy
 
-Revenue is organized into analytical categories.
+The analytical model represents revenue using a hierarchical commercial structure.
 
-The public implementation uses the following concepts:
+The main categories are:
 
 - Prospecting
 - Renewal
@@ -268,42 +248,105 @@ The public implementation uses the following concepts:
 - Cross-Sell
 - Up-Sell
 
-This hierarchy allows revenue to be analyzed at different levels of business detail.
+Cross-Sell and Up-Sell are represented as analytical classifications within the Expansion context.
+
+This hierarchy allows revenue to be analyzed at different commercial levels without exposing proprietary production classifications.
 
 ---
 
-## Dimensional Relationships
+# Relationships
 
-The analytical model follows a dimensional structure.
+The analytical model follows a dimensional modeling approach.
 
-Dimensions provide filtering context to the fact tables.
+Fact tables contain foreign keys to shared dimensions.
 
-The intended structure is:
+The main relationships include:
 
-    Dimensions
-        |
-        +----> Fact Revenue
-        |
-        +----> Fact Target
+- Fact Revenue → Dim Calendar
+- Fact Revenue → Dim Brand
+- Fact Revenue → Dim User
+- Fact Revenue → Dim Opportunity
+- Fact Revenue → Dim Opportunity Stage
+- Fact Revenue → Dim Negotiation Type
+- Fact Revenue → Dim Revenue Hierarchy
+- Fact Target → Dim Calendar
+- Fact Target → Dim Brand
+- Fact Target → Dim Target Type
+- Fact Target → Dim Revenue Hierarchy
 
-There are no direct fact-to-fact relationships.
+The model does not establish direct fact-to-fact relationships.
 
-Shared dimensions such as Calendar, Brand and Revenue Hierarchy support analysis across the analytical facts.
+Shared dimensions are used to provide consistent analytical filtering across revenue and target information.
 
 ---
 
-## Synthetic Data and Public Scope
+# Surrogate Keys
 
-All data used by the public repository is synthetic.
+The Gold layer uses surrogate keys to identify analytical entities.
 
-The model does not depend on:
+Keys are generated independently from the source identifiers and provide stable analytical references within the public model.
 
-- Production databases
-- Proprietary CRM environments
-- Internal identifiers
-- Production credentials
-- Company-specific infrastructure
+This approach separates source-system identifiers from the analytical model and supports dimensional modeling practices.
 
-The purpose of the data model is to demonstrate data engineering and analytical modeling patterns while maintaining reproducibility and protecting proprietary information.
+---
 
-The public implementation therefore focuses on the structure and behavior of the data platform rather than reproducing any specific production dataset.
+# Business Rules
+
+Business rules are implemented in the Gold layer rather than in the Bronze or Silver layers.
+
+Examples include:
+
+- Determining which opportunities qualify for revenue
+- Classifying revenue according to negotiation type
+- Applying revenue hierarchy classifications
+- Selecting the appropriate commercial value for each revenue scenario
+- Structuring target information for analytical consumption
+
+The Silver layer remains focused on standardization, validation and technical data quality.
+
+---
+
+# Analytical Model
+
+The Gold structures are consumed by the Power BI Semantic Model.
+
+The semantic model provides:
+
+- Revenue analysis
+- Target analysis
+- Achievement analysis
+- Variance analysis
+- Time intelligence
+- Year-over-year analysis
+- Commercial hierarchy analysis
+
+The analytical model is implemented using synthetic data to preserve public reproducibility.
+
+---
+
+# Public Scope
+
+The model is intentionally simplified and synthetic.
+
+It is designed to demonstrate:
+
+- Medallion Architecture
+- Data transformation
+- Dimensional modeling
+- Surrogate keys
+- Business-rule implementation
+- Revenue and target modeling
+- Semantic modeling
+- Analytical consumption
+
+Production data, proprietary identifiers, internal system structures and confidential business rules are intentionally excluded from the repository.
+
+The implementation demonstrates the architecture and engineering approach rather than reproducing a production environment.
+
+---
+
+# Design Principle
+
+> The data changes. The architecture remains.
+
+The public model is therefore designed around reusable engineering and analytical patterns rather than dependencies on a specific production dataset.
